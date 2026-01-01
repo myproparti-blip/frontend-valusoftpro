@@ -2264,10 +2264,8 @@ export function generateValuationReportHTML(data = {}) {
   </div>
    </div>
 
- 
-
   <!-- PAGE 7C: VALUATION SUMMARY -->
-  <div class="page valuation-summary-section" style="page-break-before: always; margin-top: 30px; padding: 40px;">
+  <div class="page valuation-summary-section" style="margin-top: 20px; padding: 40px;">
   <div style="text-align: justify; line-height: 1.8; font-size: 12pt;">
     <p style="margin-bottom: 15px;">
       As a result of my appraisal and analysis, it is my considered opinion that the present fair market value of the above property in the prevailing condition with aforesaid specifications is <strong>₹ 47,47,000.00 /- (Rupees Forty Seven Lac Forty Seven Thousand Only)</strong> of the above property.
@@ -3174,6 +3172,7 @@ export async function generateRecordPDFOffline(record) {
     let sourceY = 0;  // Track position in the source canvas
     let cValuationPageBreakHandled = false;  // Track if we've handled the page break
     let pageAdded = false;  // Track if first page is added to prevent empty page
+    let currentPageYPosition = headerHeight;  // Track current Y position on page to avoid empty pages
 
     while (heightLeft > 5) {  // Only continue if there's meaningful content left (>5mm to avoid blank pages)
       // Check if we need to force a page break for C. VALUATION DETAILS section
@@ -3377,6 +3376,9 @@ export async function generateRecordPDFOffline(record) {
         pdf.setFontSize(9);
         pdf.text(`Page ${pageNumber}`, 105, pageHeight - 5, { align: 'center' });
 
+        // Update Y position tracking
+        currentPageYPosition = headerHeight + imageHeightForThisPage;
+
         pageNumber++;
       }
 
@@ -3385,6 +3387,9 @@ export async function generateRecordPDFOffline(record) {
       sourceY += imageHeightForThisPage;
     }
 
+    // Reset currentPageYPosition since we're starting new section for separate .page elements
+    currentPageYPosition = headerHeight;
+
     // Add page canvases as separate pages in PDF
     console.log(`📄 Adding ${pageCanvases.length} separate .page canvases to PDF...`);
     for (let i = 0; i < pageCanvases.length; i++) {
@@ -3392,7 +3397,19 @@ export async function generateRecordPDFOffline(record) {
       const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.85);
       const pageImgHeight = (pageCanvas.height * imgWidth) / pageCanvas.width;
 
-      pdf.addPage();
+      // Only add new page if there's substantial content on current page (more than just header space)
+      // currentPageYPosition > headerHeight + 20 means there's at least 20mm of content
+      if (currentPageYPosition > headerHeight + 20) {
+        pdf.addPage();
+        pageNumber++;
+        currentPageYPosition = headerHeight;
+        console.log(`📄 Added new page for .page element ${i + 1}`);
+      } else {
+        console.log(`📄 Skipping new page for .page element ${i + 1} - minimal content on current page`);
+        // If on current page with minimal content, just continue on same page
+        // currentPageYPosition already at headerHeight, ready for new content
+      }
+
       // Add image with proper margins (12mm = ~45px at 96dpi)
       const leftMargin = 12;
       const topMargin = 12;
@@ -3402,6 +3419,10 @@ export async function generateRecordPDFOffline(record) {
       pdf.addImage(pageImgData, 'JPEG', leftMargin, topMargin, availableWidth, adjustedImgHeight);
       pdf.setFontSize(9);
       pdf.text(`Page ${pageNumber}`, 105, pageHeight - 5, { align: 'center' });
+      
+      // Update Y position tracking
+      currentPageYPosition = topMargin + adjustedImgHeight;
+
       pageNumber++;
       console.log(`✅ Added .page canvas ${i + 1} as page ${pageNumber - 1}`);
     }
