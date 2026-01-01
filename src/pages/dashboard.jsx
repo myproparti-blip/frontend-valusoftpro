@@ -126,6 +126,7 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
                 formRoute = getFormRouteForBank(record?.bankName);
             }
         }
+        // Navigate immediately without loader for fast performance
         navigate(`${formRoute}/${record.uniqueId}`);
     }, [navigate]);
 
