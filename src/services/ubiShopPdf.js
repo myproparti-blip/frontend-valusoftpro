@@ -637,7 +637,7 @@ export function generateValuationReportHTML(data = {}) {
     const normalizedData = normalizeDataForPDF(data);
 
     // Debug logging to verify data is being received
-    ('🔍 PDF Data Received:', {
+    console.log('🔍 PDF Data Received:', {
         hasData: !!data,
         hasRootFields: {
             uniqueId: !!data?.uniqueId,
@@ -714,7 +714,7 @@ export function generateValuationReportHTML(data = {}) {
         }
 
         // DEBUG: Log field mapping
-        ('🔧 Field Mapping Debug:', {
+        console.log('🔧 Field Mapping Debug:', {
             allPdfDetailsKeys: Object.keys(data.pdfDetails),
             classificationPosh: data.pdfDetails.classificationPosh,
             unitMaintenance: data.pdfDetails.unitMaintenance,
@@ -981,7 +981,7 @@ export function generateValuationReportHTML(data = {}) {
     };
 
     // Debug: Log critical fields for troubleshooting
-    ('🔍 PDF Field Extraction Debug:', {
+    console.log('🔍 PDF Field Extraction Debug:', {
         areaClassification: pdfData.areaClassification,
         postalAddress: pdfData.postalAddress,
         postalAddressRaw: data?.postalAddress,
@@ -994,7 +994,7 @@ export function generateValuationReportHTML(data = {}) {
     // The old propertyImagesHTML and locationImagesHTML variables have been removed to prevent duplication
 
     // DEBUG: Log final pdfData before rendering
-    ('📋 Final pdfData before HTML rendering:', {
+    console.log('📋 Final pdfData before HTML rendering:', {
         unitMaintenance: pdfData.unitMaintenance,
         unitClassification: pdfData.unitClassification,
         classificationPosh: pdfData.classificationPosh,
@@ -1467,7 +1467,6 @@ export function generateValuationReportHTML(data = {}) {
 
   <div style="padding: 0 8mm;">
     <div class="cover-header">
-    <p style="margin: 5px 0; font-size: 12pt;">Ref. No.: ${safeGet(pdfData, 'referenceNo', 'NA')}</p>
     <p style="text-align: right; margin: 5px 0; font-size: 12pt;"><strong>Date: ${formatDate(safeGet(pdfData, 'valuationMadeDate'))}</strong></p>
     <p style="margin: 5px 0; font-size: 12pt;">TO,</p>
     <p style="margin: 5px 0; font-size: 12pt;">${safeGet(data, 'bankName')}</p>
@@ -2581,29 +2580,29 @@ valuer organization discredits the profession.  </p>
     
     ${pdfData.areaImages && typeof pdfData.areaImages === 'object' && Object.keys(pdfData.areaImages).length > 0 ? `
     ${(() => {
-        let allImages = [];
-        let globalIdx = 0;
-        Object.entries(pdfData.areaImages).forEach(([areaName, areaImageList]) => {
-            if (Array.isArray(areaImageList)) {
-                areaImageList.forEach((img, idx) => {
-                    const imgSrc = typeof img === 'string' ? img : (img?.url || img?.preview || img?.data || img?.src || '');
-                    if (imgSrc) {
-                        allImages.push({
-                            src: imgSrc,
-                            label: areaName + ' - Image ' + (idx + 1),
-                            globalIdx: globalIdx++
+                let allImages = [];
+                let globalIdx = 0;
+                Object.entries(pdfData.areaImages).forEach(([areaName, areaImageList]) => {
+                    if (Array.isArray(areaImageList)) {
+                        areaImageList.forEach((img, idx) => {
+                            const imgSrc = typeof img === 'string' ? img : (img?.url || img?.preview || img?.data || img?.src || '');
+                            if (imgSrc) {
+                                allImages.push({
+                                    src: imgSrc,
+                                    label: areaName + ' - Image ' + (idx + 1),
+                                    globalIdx: globalIdx++
+                                });
+                            }
                         });
                     }
                 });
-            }
-        });
-        
-        let pages = [];
-        for (let i = 0; i < allImages.length; i += 6) {
-            pages.push(allImages.slice(i, i + 6));
-        }
-        
-        return pages.map((pageImages, pageIdx) => `
+
+                let pages = [];
+                for (let i = 0; i < allImages.length; i += 6) {
+                    pages.push(allImages.slice(i, i + 6));
+                }
+
+                return pages.map((pageImages, pageIdx) => `
         <div class="page images-section area-images-page" style="page-break-before: always; page-break-after: always; break-before: page; break-after: page; page-break-inside: avoid;">
              <div style="padding: 10px; font-size: 12pt;">
                  ${pageIdx === 0 ? '<h2 style="text-align: center; margin: 0 0 8px 0; font-weight: bold;">PROPERTY AREA IMAGES</h2>' : ''}
@@ -2616,7 +2615,7 @@ valuer organization discredits the profession.  </p>
                  </div>
              </div>
         </div>`).join('');
-    })()}
+            })()}
      ` : ''}
 
     ${Array.isArray(pdfData.locationImages) && pdfData.locationImages.length > 0 ? `
@@ -2624,13 +2623,13 @@ valuer organization discredits the profession.  </p>
         <div style="padding: 20px; font-size: 12pt; display: flex; flex-direction: column; gap: 20px;">
             <h2 style="text-align: center; margin: 0 0 20px 0; font-weight: bold;">LOCATION IMAGES</h2>
             ${pdfData.locationImages.map((img, idx) => {
-        const imgSrc = typeof img === 'string' ? img : img?.url;
-        return imgSrc ? `
+                const imgSrc = typeof img === 'string' ? img : img?.url;
+                return imgSrc ? `
                 <div class="image-container" style="page-break-inside: avoid; break-inside: avoid; border: 1px solid #ddd; padding: 10px; background: #fafafa; flex-shrink: 0;">
                     <img class="pdf-image" src="${imgSrc}" alt="Location Image ${idx + 1}" style="width: 100%; height: auto; max-height: 500px; object-fit: contain;">
                 </div>
                 ` : '';
-      }).join('')}
+            }).join('')}
          </div>
      </div>
      ` : ''}
@@ -2638,18 +2637,20 @@ valuer organization discredits the profession.  </p>
    
 
     ${Array.isArray(pdfData.documentPreviews) && pdfData.documentPreviews.length > 0 ? `
+    <div class="supporting-docs-section">
     ${pdfData.documentPreviews.map((img, idx) => {
-        const imgSrc = typeof img === 'string' ? img : img?.url;
-        return imgSrc ? `
-        <div class="page images-section supporting-docs-page" style="page-break-before: always; break-before: page; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 45vh; padding: 20px;">
-            ${idx === 0 ? '<h2 style="text-align: center; margin-bottom: 30px; font-weight: bold; width: 100%;">DOCUMENTS IMG</h2>' : ''}
-            <div class="image-container" style="border: 1px solid #ddd; padding: 10px; background: #fafafa; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 80%; max-width: 800px;">
-                <img class="pdf-image" src="${imgSrc}" alt="Supporting Document ${idx + 1}" style="width: 100%; height: auto; max-height: 600px; object-fit: contain;">
-                <p style="margin: 10px 0 0 0; font-size: 10pt; color: #666;">Document ${idx + 1}</p>
+                const imgSrc = typeof img === 'string' ? img : img?.url;
+                return imgSrc ? `
+        <div class="page images-section supporting-docs-page" style="page-break-before: always; break-before: page; width: 100%; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+            ${idx === 0 ? '<h2 style="text-align: center; margin-bottom: 30px; font-weight: bold; width: 100%; font-size: 18pt;">SUPPORTING DOCUMENTS</h2>' : ''}
+            <div class="image-container" style="border: 1px solid #ddd; padding: 10px; background: #fafafa; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 90%; max-width: 800px; height: auto;">
+                <img class="pdf-image" src="${imgSrc}" alt="Supporting Document ${idx + 1}" style="width: 100%; height: auto; max-height: 550px; object-fit: contain; margin: 0 auto;">
+                <p style="margin: 10px 0 0 0; font-size: 10pt; color: #666; text-align: center;">Document ${idx + 1}</p>
             </div>
         </div>
         ` : '';
-    }).join('')}
+            }).join('')}
+    </div>
      ` : ''}
 
     </body>
@@ -2659,8 +2660,8 @@ valuer organization discredits the profession.  </p>
 
 export async function generateRecordPDF(record) {
     try {
-        ('📄 Generating PDF for record:', record?.uniqueId || record?.clientName || 'new');
-        ('🔍 FULL RECORD DATA:', {
+        console.log('📄 Generating PDF for record:', record?.uniqueId || record?.clientName || 'new');
+        console.log('🔍 FULL RECORD DATA:', {
             recordKeys: Object.keys(record || {}),
             recordSize: JSON.stringify(record || {}).length,
             pdfDetailsExists: !!record?.pdfDetails,
@@ -2680,7 +2681,7 @@ export async function generateRecordPDF(record) {
  */
 export async function previewValuationPDF(record) {
     try {
-        ('👁️ Generating PDF preview for:', record?.uniqueId || record?.clientName || 'new');
+        console.log('👁️ Generating PDF preview for:', record?.uniqueId || record?.clientName || 'new');
 
         // Dynamically import jsPDF and html2canvas
         const { jsPDF } = await import('jspdf');
@@ -2712,11 +2713,11 @@ export async function previewValuationPDF(record) {
 
             // If image has no src or invalid src, mark container for removal
             if (!src || !src.trim() || src === 'undefined' || src === 'null') {
-                (`⏭️ Invalid image src: ${alt}`);
+                console.log(`⏭️ Invalid image src: ${alt}`);
                 let parentContainer = img.closest('.image-container');
                 if (parentContainer) {
                     imagesToRemove.add(parentContainer);
-                    (`⏭️ Marking for removal (invalid src): ${alt}`);
+                    console.log(`⏭️ Marking for removal (invalid src): ${alt}`);
                 }
             }
         });
@@ -2728,11 +2729,11 @@ export async function previewValuationPDF(record) {
                 const timeoutId = setTimeout(() => {
                     // If image hasn't loaded after 5 seconds, mark for removal
                     if (!img.complete || img.naturalHeight === 0) {
-                        (`⏭️ Image timeout/failed to load: ${alt}`);
+                        console.log(`⏭️ Image timeout/failed to load: ${alt}`);
                         let parentContainer = img.closest('.image-container');
                         if (parentContainer) {
                             imagesToRemove.add(parentContainer);
-                            (`⏭️ Marking for removal (timeout): ${alt}`);
+                            console.log(`⏭️ Marking for removal (timeout): ${alt}`);
                         }
                     }
                     resolve();
@@ -2740,17 +2741,17 @@ export async function previewValuationPDF(record) {
 
                 img.onload = () => {
                     clearTimeout(timeoutId);
-                    (`✅ Image loaded successfully: ${alt}`);
+                    console.log(`✅ Image loaded successfully: ${alt}`);
                     resolve();
                 };
 
                 img.onerror = () => {
                     clearTimeout(timeoutId);
-                    (`❌ Image failed to load: ${alt}`);
+                    console.log(`❌ Image failed to load: ${alt}`);
                     let parentContainer = img.closest('.image-container');
                     if (parentContainer) {
                         imagesToRemove.add(parentContainer);
-                        (`⏭️ Marking for removal (onerror): ${alt}`);
+                        console.log(`⏭️ Marking for removal (onerror): ${alt}`);
                     }
                     resolve();
                 };
@@ -2759,14 +2760,14 @@ export async function previewValuationPDF(record) {
                 if (img.complete) {
                     clearTimeout(timeoutId);
                     if (img.naturalHeight === 0) {
-                        (`⏭️ Image failed (no height): ${alt}`);
+                        console.log(`⏭️ Image failed (no height): ${alt}`);
                         let parentContainer = img.closest('.image-container');
                         if (parentContainer) {
                             imagesToRemove.add(parentContainer);
-                            (`⏭️ Marking for removal (no height): ${alt}`);
+                            console.log(`⏭️ Marking for removal (no height): ${alt}`);
                         }
                     } else {
-                        (`✅ Image already loaded: ${alt}`);
+                        console.log(`✅ Image already loaded: ${alt}`);
                     }
                     resolve();
                 }
@@ -2774,10 +2775,10 @@ export async function previewValuationPDF(record) {
         }));
 
         // Remove all marked containers
-        (`🗑️ Removing ${imagesToRemove.size} failed/invalid image containers`);
+        console.log(`🗑️ Removing ${imagesToRemove.size} failed/invalid image containers`);
         imagesToRemove.forEach(el => {
             const alt = el.querySelector('img')?.getAttribute('alt') || 'unknown';
-            (`✂️ Removed container: ${alt}`);
+            console.log(`✂️ Removed container: ${alt}`);
             el.remove();
         });
 
@@ -2812,13 +2813,13 @@ export async function previewValuationPDF(record) {
         while (heightLeft > 5) {
             // Calculate how much of the image fits on this page
             let imageHeightForThisPage = Math.min(usableHeight, heightLeft);
-            
+
             // Calculate the crop region from the canvas
             const canvasHeight = canvas.height;
             const canvasWidth = canvas.width;
             const sourceYPixels = (sourceY / imgHeight) * canvasHeight;
             const maxHeightPixels = (imageHeightForThisPage / imgHeight) * canvasHeight;
-            
+
             // Guard against getImageData with 0 height
             if (maxHeightPixels <= 0) {
                 console.warn('⚠️ Height is 0 or negative, skipping page');
@@ -2826,7 +2827,7 @@ export async function previewValuationPDF(record) {
                 sourceY += imageHeightForThisPage;
                 continue;
             }
-            
+
             // Create a cropped canvas for this page
             const croppedPageCanvas = document.createElement('canvas');
             croppedPageCanvas.width = canvasWidth;
@@ -2850,12 +2851,12 @@ export async function previewValuationPDF(record) {
                 } else {
                     pageAdded = true;
                 }
-                
+
                 // Add cropped image with fixed header margin (no currentPageYPosition tracking needed)
                 pdf.addImage(pageImgData, 'PNG', 0, headerHeight, imgWidth, imageHeightForThisPage);
-                
+
                 pageNumber++;
-                
+
                 // Update counters only after content is added
                 heightLeft -= imageHeightForThisPage;
                 sourceY += imageHeightForThisPage;
@@ -2868,7 +2869,7 @@ export async function previewValuationPDF(record) {
 
         // Remove the first blank page if no content was added (jsPDF creates with 1 blank page by default)
         if (!pageAdded) {
-            ('⚠️ No content added, removing blank first page');
+            console.log('⚠️ No content added, removing blank first page');
             // Get total pages and remove first one if it's blank
             const totalPages = pdf.getNumberOfPages();
             if (totalPages > 1) {
@@ -2876,12 +2877,12 @@ export async function previewValuationPDF(record) {
             }
         }
 
-         // Create blob URL and open in new tab
-         const blob = pdf.output('blob');
-         const url = window.URL.createObjectURL(blob);
-         window.open(url, '_blank');
+        // Create blob URL and open in new tab
+        const blob = pdf.output('blob');
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
 
-        ('✅ PDF preview opened');
+        console.log('✅ PDF preview opened');
         return url;
     } catch (error) {
         console.error('❌ PDF preview error:', error);
@@ -2952,13 +2953,13 @@ const convertImagesToBase64 = async (record) => {
 
     // Convert property images
     if (Array.isArray(recordCopy.propertyImages)) {
-        ('📸 Processing property images:', recordCopy.propertyImages.length);
+        console.log('📸 Processing property images:', recordCopy.propertyImages.length);
         const converted = await Promise.all(
             recordCopy.propertyImages.map(async (img, idx) => {
                 try {
                     // CRITICAL: Reject null/undefined/empty immediately
                     if (!img) {
-                        (`  Property image ${idx}: null/undefined/empty, skipping`);
+                        console.log(`  Property image ${idx}: null/undefined/empty, skipping`);
                         return null;
                     }
 
@@ -2972,17 +2973,17 @@ const convertImagesToBase64 = async (record) => {
 
                     // CRITICAL: Reject if URL is empty string or only whitespace
                     if (!url || url.length === 0 || typeof url !== 'string') {
-                        (`  Property image ${idx}: empty/invalid URL extracted "${url}" - FILTERING OUT`);
+                        console.log(`  Property image ${idx}: empty/invalid URL extracted "${url}" - FILTERING OUT`);
                         return null;
                     }
 
                     url = extractImageUrl(url);
                     if (!url) {
-                        (`  Property image ${idx}: no valid URL format - FILTERING OUT`);
+                        console.log(`  Property image ${idx}: no valid URL format - FILTERING OUT`);
                         return null; // ← CRITICAL: Return null to filter out in next step
                     }
 
-                    (`  Property image ${idx}: attempting conversion from ${url.substring(0, 60)}`);
+                    console.log(`  Property image ${idx}: attempting conversion from ${url.substring(0, 60)}`);
                     const base64 = await urlToBase64(url);
 
                     if (base64 && base64.trim()) {
@@ -2992,7 +2993,7 @@ const convertImagesToBase64 = async (record) => {
                         return { ...img, url: base64 };
                     } else {
                         // Conversion failed - return null instead of empty URL
-                        (`  Property image ${idx}: conversion failed - FILTERING OUT`);
+                        console.log(`  Property image ${idx}: conversion failed - FILTERING OUT`);
                         return null; // ← CRITICAL: Return null instead of empty URL
                     }
                 } catch (err) {
@@ -3003,18 +3004,18 @@ const convertImagesToBase64 = async (record) => {
         );
         // ← CRITICAL: Filter out null entries
         recordCopy.propertyImages = converted.filter(img => img !== null);
-        (`📸 Property images after filtering: ${recordCopy.propertyImages.length} valid out of ${recordCopy.propertyImages.length + converted.filter(x => x === null).length} total`);
+        console.log(`📸 Property images after filtering: ${recordCopy.propertyImages.length} valid out of ${recordCopy.propertyImages.length + converted.filter(x => x === null).length} total`);
     }
 
     // Convert location images
     if (Array.isArray(recordCopy.locationImages)) {
-        ('📸 Processing location images:', recordCopy.locationImages.length);
+        console.log('📸 Processing location images:', recordCopy.locationImages.length);
         const converted = await Promise.all(
             recordCopy.locationImages.map(async (img, idx) => {
                 try {
                     // CRITICAL: Reject null/undefined/empty immediately
                     if (!img) {
-                        (`  Location image ${idx}: null/undefined/empty, skipping`);
+                        console.log(`  Location image ${idx}: null/undefined/empty, skipping`);
                         return null;
                     }
 
@@ -3028,17 +3029,17 @@ const convertImagesToBase64 = async (record) => {
 
                     // CRITICAL: Reject if URL is empty string or only whitespace
                     if (!url || url.length === 0 || typeof url !== 'string') {
-                        (`  Location image ${idx}: empty/invalid URL extracted "${url}" - FILTERING OUT`);
+                        console.log(`  Location image ${idx}: empty/invalid URL extracted "${url}" - FILTERING OUT`);
                         return null;
                     }
 
                     url = extractImageUrl(url);
                     if (!url) {
-                        (`  Location image ${idx}: no valid URL format - FILTERING OUT`);
+                        console.log(`  Location image ${idx}: no valid URL format - FILTERING OUT`);
                         return null; // ← CRITICAL: Return null to filter out in next step
                     }
 
-                    (`  Location image ${idx}: attempting conversion from ${url.substring(0, 60)}`);
+                    console.log(`  Location image ${idx}: attempting conversion from ${url.substring(0, 60)}`);
                     const base64 = await urlToBase64(url);
 
                     if (base64 && base64.trim()) {
@@ -3048,7 +3049,7 @@ const convertImagesToBase64 = async (record) => {
                         return { ...img, url: base64 };
                     } else {
                         // Conversion failed - return null instead of empty URL
-                        (`  Location image ${idx}: conversion failed - FILTERING OUT`);
+                        console.log(`  Location image ${idx}: conversion failed - FILTERING OUT`);
                         return null; // ← CRITICAL: Return null instead of empty URL
                     }
                 } catch (err) {
@@ -3059,18 +3060,18 @@ const convertImagesToBase64 = async (record) => {
         );
         // ← CRITICAL: Filter out null entries
         recordCopy.locationImages = converted.filter(img => img !== null);
-        (`📸 Location images after filtering: ${recordCopy.locationImages.length} valid out of ${recordCopy.locationImages.length + converted.filter(x => x === null).length} total`);
+        console.log(`📸 Location images after filtering: ${recordCopy.locationImages.length} valid out of ${recordCopy.locationImages.length + converted.filter(x => x === null).length} total`);
     }
 
     // Convert document previews (supporting documents)
     if (Array.isArray(recordCopy.documentPreviews)) {
-        ('📸 Processing document previews:', recordCopy.documentPreviews.length);
+        console.log('📸 Processing document previews:', recordCopy.documentPreviews.length);
         const converted = await Promise.all(
             recordCopy.documentPreviews.map(async (img, idx) => {
                 try {
                     // CRITICAL: Reject null/undefined/empty immediately
                     if (!img) {
-                        (`  Document preview ${idx}: null/undefined/empty, skipping`);
+                        console.log(`  Document preview ${idx}: null/undefined/empty, skipping`);
                         return null;
                     }
 
@@ -3084,17 +3085,17 @@ const convertImagesToBase64 = async (record) => {
 
                     // CRITICAL: Reject if URL is empty string or only whitespace
                     if (!url || url.length === 0 || typeof url !== 'string') {
-                        (`  Document preview ${idx}: empty/invalid URL extracted "${url}" - FILTERING OUT`);
+                        console.log(`  Document preview ${idx}: empty/invalid URL extracted "${url}" - FILTERING OUT`);
                         return null;
                     }
 
                     url = extractImageUrl(url);
                     if (!url) {
-                        (`  Document preview ${idx}: no valid URL format - FILTERING OUT`);
+                        console.log(`  Document preview ${idx}: no valid URL format - FILTERING OUT`);
                         return null; // ← CRITICAL: Return null to filter out in next step
                     }
 
-                    (`  Document preview ${idx}: attempting conversion from ${url.substring(0, 60)}`);
+                    console.log(`  Document preview ${idx}: attempting conversion from ${url.substring(0, 60)}`);
                     const base64 = await urlToBase64(url);
 
                     if (base64 && base64.trim()) {
@@ -3104,7 +3105,7 @@ const convertImagesToBase64 = async (record) => {
                         return { ...img, url: base64 };
                     } else {
                         // Conversion failed - return null instead of empty URL
-                        (`  Document preview ${idx}: conversion failed - FILTERING OUT`);
+                        console.log(`  Document preview ${idx}: conversion failed - FILTERING OUT`);
                         return null; // ← CRITICAL: Return null instead of empty URL
                     }
                 } catch (err) {
@@ -3115,10 +3116,10 @@ const convertImagesToBase64 = async (record) => {
         );
         // ← CRITICAL: Filter out null entries
         recordCopy.documentPreviews = converted.filter(img => img !== null);
-        (`📸 Document previews after filtering: ${recordCopy.documentPreviews.length} valid out of ${recordCopy.documentPreviews.length + converted.filter(x => x === null).length} total`);
+        console.log(`📸 Document previews after filtering: ${recordCopy.documentPreviews.length} valid out of ${recordCopy.documentPreviews.length + converted.filter(x => x === null).length} total`);
     }
 
-    ('✅ Image conversion complete:', {
+    console.log('✅ Image conversion complete:', {
         propertyImages: recordCopy.propertyImages?.length || 0,
         locationImages: recordCopy.locationImages?.length || 0,
         documentPreviews: recordCopy.documentPreviews?.length || 0
@@ -3233,7 +3234,7 @@ const parseHTMLForDocx = (htmlContent) => {
  */
 export async function generateRecordDOCX(record) {
     try {
-        ('📝 Generating Word document...');
+        console.log('📝 Generating Word document...');
 
         // Use EXACT same data normalization as PDF
         const normalizedData = normalizeDataForPDF(record);
@@ -3305,7 +3306,7 @@ export async function generateRecordDOCX(record) {
             sections.push(...currentPageParagraphs);
         }
 
-        (`📄 Word document structure: ${pageCount} full pages + final section with ${currentPageParagraphs.length} paragraphs`);
+        console.log(`📄 Word document structure: ${pageCount} full pages + final section with ${currentPageParagraphs.length} paragraphs`);
 
         // Create document with identical content structure as PDF
         const doc = new Document({
@@ -3325,7 +3326,7 @@ export async function generateRecordDOCX(record) {
         });
 
         // Generate and save the document
-        ('📦 Packing document into .docx format...');
+        console.log('📦 Packing document into .docx format...');
         const blob = await Packer.toBlob(doc);
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -3335,14 +3336,14 @@ export async function generateRecordDOCX(record) {
         link.download = filename;
         document.body.appendChild(link);
 
-        (`⬇️ Downloading: ${filename}`);
+        console.log(`⬇️ Downloading: ${filename}`);
         link.click();
 
         // Cleanup
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
 
-        ('✅ Word document generated and downloaded:', filename);
+        console.log('✅ Word document generated and downloaded:', filename);
         return filename;
     } catch (error) {
         console.error('❌ Word document generation error:', error);
@@ -3352,8 +3353,8 @@ export async function generateRecordDOCX(record) {
 
 export async function generateRecordPDFOffline(record) {
     try {
-        ('📠 Generating PDF (client-side mode)');
-        ('📊 Input Record Structure:', {
+        console.log('📠 Generating PDF (client-side mode)');
+        console.log('📊 Input Record Structure:', {
             recordKeys: Object.keys(record || {}),
             rootFields: {
                 uniqueId: record?.uniqueId,
@@ -3385,7 +3386,7 @@ export async function generateRecordPDFOffline(record) {
         });
 
         // Convert images to base64 for PDF embedding
-        ('🖼️ Converting images to base64...');
+        console.log('🖼️ Converting images to base64...');
         const recordWithBase64Images = await convertImagesToBase64(record);
 
         // Dynamically import jsPDF and html2canvas to avoid SSR issues
@@ -3457,27 +3458,27 @@ export async function generateRecordPDFOffline(record) {
                 } else if (section.name === 'supportingDocs') {
                     supportingDocsHtmlContent = sectionContent;
                 }
-                }
-                ('✂️ Split HTML: Sections separated - Details, Annexure-II, Annexure-III, Property Images, Area Images, Location Images, Supporting Docs');
-                }
+            }
+            console.log('✂️ Split HTML: Sections separated - Details, Annexure-II, Annexure-III, Property Images, Area Images, Location Images, Supporting Docs');
+        }
 
         // Remove all image sections from mainHtmlContent to prevent them from being rendered in main PDF
         let cleanMainContent = mainHtmlContent;
-        
+
         // Remove property-images-page section
         cleanMainContent = cleanMainContent.replace(/<div[^>]*property-images-page[^>]*>[\s\S]*?<\/div>/g, '');
-        
+
         // Remove area-images-page sections
         cleanMainContent = cleanMainContent.replace(/<div[^>]*area-images-page[^>]*>[\s\S]*?<\/div>/g, '');
-        
+
         // Remove location-images-page sections
         cleanMainContent = cleanMainContent.replace(/<div[^>]*location-images-page[^>]*>[\s\S]*?<\/div>/g, '');
-        
+
         // Remove supporting-docs-page sections
         cleanMainContent = cleanMainContent.replace(/<div[^>]*supporting-docs-page[^>]*>[\s\S]*?<\/div>/g, '');
-        
+
         mainHtmlContent = cleanMainContent;
-        ('🗑️ Removed image sections from main content');
+        console.log('🗑️ Removed image sections from main content');
 
         // Create a temporary container for main content
         const container = document.createElement('div');
@@ -3504,11 +3505,11 @@ export async function generateRecordPDFOffline(record) {
 
             // If image has no src or invalid src, mark container for removal
             if (!src || !src.trim() || src === 'undefined' || src === 'null') {
-                (`⏭️ Invalid image src: ${alt}`);
+                console.log(`⏭️ Invalid image src: ${alt}`);
                 let parentContainer = img.closest('.image-container');
                 if (parentContainer) {
                     imagesToRemove.add(parentContainer);
-                    (`⏭️ Marking for removal (invalid src): ${alt}`);
+                    console.log(`⏭️ Marking for removal (invalid src): ${alt}`);
                 }
             }
         });
@@ -3520,11 +3521,11 @@ export async function generateRecordPDFOffline(record) {
                 const timeoutId = setTimeout(() => {
                     // If image hasn't loaded after 5 seconds, mark for removal
                     if (!img.complete || img.naturalHeight === 0) {
-                        (`⏭️ Image timeout/failed to load: ${alt}`);
+                        console.log(`⏭️ Image timeout/failed to load: ${alt}`);
                         let parentContainer = img.closest('.image-container');
                         if (parentContainer) {
                             imagesToRemove.add(parentContainer);
-                            (`⏭️ Marking for removal (timeout): ${alt}`);
+                            console.log(`⏭️ Marking for removal (timeout): ${alt}`);
                         }
                     }
                     resolve();
@@ -3532,17 +3533,17 @@ export async function generateRecordPDFOffline(record) {
 
                 img.onload = () => {
                     clearTimeout(timeoutId);
-                    (`✅ Image loaded successfully: ${alt}`);
+                    console.log(`✅ Image loaded successfully: ${alt}`);
                     resolve();
                 };
 
                 img.onerror = () => {
                     clearTimeout(timeoutId);
-                    (`❌ Image failed to load: ${alt}`);
+                    console.log(`❌ Image failed to load: ${alt}`);
                     let parentContainer = img.closest('.image-container');
                     if (parentContainer) {
                         imagesToRemove.add(parentContainer);
-                        (`⏭️ Marking for removal (onerror): ${alt}`);
+                        console.log(`⏭️ Marking for removal (onerror): ${alt}`);
                     }
                     resolve();
                 };
@@ -3551,14 +3552,14 @@ export async function generateRecordPDFOffline(record) {
                 if (img.complete) {
                     clearTimeout(timeoutId);
                     if (img.naturalHeight === 0) {
-                        (`⏭️ Image failed (no height): ${alt}`);
+                        console.log(`⏭️ Image failed (no height): ${alt}`);
                         let parentContainer = img.closest('.image-container');
                         if (parentContainer) {
                             imagesToRemove.add(parentContainer);
-                            (`⏭️ Marking for removal (no height): ${alt}`);
+                            console.log(`⏭️ Marking for removal (no height): ${alt}`);
                         }
                     } else {
-                        (`✅ Image already loaded: ${alt}`);
+                        console.log(`✅ Image already loaded: ${alt}`);
                     }
                     resolve();
                 }
@@ -3566,25 +3567,25 @@ export async function generateRecordPDFOffline(record) {
         }));
 
         // Remove all marked containers
-        (`🗑️ Removing ${imagesToRemove.size} failed/invalid image containers`);
+        console.log(`🗑️ Removing ${imagesToRemove.size} failed/invalid image containers`);
         imagesToRemove.forEach(el => {
             const alt = el.querySelector('img')?.getAttribute('alt') || 'unknown';
-            (`✂️ Removed container: ${alt}`);
+            console.log(`✂️ Removed container: ${alt}`);
             el.remove();
         });
 
         // Extract images and REMOVE ALL image containers from HTML
         // This prevents empty/blank image containers from appearing in the PDF
-        ('⏳ Extracting images and removing containers from HTML...');
+        console.log('⏳ Extracting images and removing containers from HTML...');
         const images = Array.from(container.querySelectorAll('img.pdf-image'));
-        (`📸 Found ${images.length} img.pdf-image elements in HTML`);
+        console.log(`📸 Found ${images.length} img.pdf-image elements in HTML`);
         const imageData = [];
 
         // Extract valid images and REMOVE ALL their containers
         for (const img of images) {
             const src = img.src || img.getAttribute('data-src');
             const label = img.getAttribute('alt') || 'Image';
-            (`📸 Processing image: ${label}, src length: ${src?.length || 0}, starts with data: ${src?.startsWith('data:')}, blob: ${src?.startsWith('blob:')}, http: ${src?.startsWith('http')}`);
+            console.log(`📸 Processing image: ${label}, src length: ${src?.length || 0}, starts with data: ${src?.startsWith('data:')}, blob: ${src?.startsWith('blob:')}, http: ${src?.startsWith('http')}`);
 
             // Only extract images with valid src
             if (src && (src.startsWith('data:') || src.startsWith('blob:') || src.startsWith('http'))) {
@@ -3594,21 +3595,21 @@ export async function generateRecordPDFOffline(record) {
                     type: label.includes('Location') ? 'location' :
                         label.includes('Supporting Image') ? 'supporting' : 'property'
                 });
-                (`✅ Extracted image: ${label} (type: ${label.includes('Location') ? 'location' : label.includes('Supporting Image') ? 'supporting' : 'property'})`);
+                console.log(`✅ Extracted image: ${label} (type: ${label.includes('Location') ? 'location' : label.includes('Supporting Image') ? 'supporting' : 'property'})`);
             } else {
-                (`⏭️ Invalid image src, will not add to PDF: ${label} - src: ${src?.substring(0, 100)}`);
+                console.log(`⏭️ Invalid image src, will not add to PDF: ${label} - src: ${src?.substring(0, 100)}`);
             }
 
             // CRITICAL FIX: REMOVE the ENTIRE image container from HTML
             // (not just hiding the image) to prevent empty boxes from rendering in PDF
             const parentContainer = img.closest('.image-container');
             if (parentContainer) {
-                (`🗑️ Removing image container from HTML: ${label}`);
+                console.log(`🗑️ Removing image container from HTML: ${label}`);
                 parentContainer.remove();
             }
         }
 
-        ('✅ Extracted', imageData.length, 'images; removed', images.length, 'containers from HTML');
+        console.log('✅ Extracted', imageData.length, 'images; removed', images.length, 'containers from HTML');
 
         // Convert HTML to canvas
         const canvas = await html2canvas(container, {
@@ -3636,7 +3637,7 @@ export async function generateRecordPDFOffline(record) {
         // Remove temporary container
         document.body.removeChild(container);
 
-        ('✅ Container removed, creating PDF...');
+        console.log('✅ Container removed, creating PDF...');
 
         // Create PDF from canvas with header/footer margins
         // Use JPEG for better compression instead of PNG
@@ -3715,14 +3716,14 @@ export async function generateRecordPDFOffline(record) {
         };
 
         const pdf = new jsPDF('p', 'mm', 'A4');
-         let pageNumber = 1;
-         let heightLeft = imgHeight;
-         let yPosition = 0;
-         let sourceY = 0;  // Track position in the source canvas
-         let currentPageYPosition = headerHeight;  // Track current Y position on page
-         let pageAdded = false;  // Track if first page is added to prevent empty page
+        let pageNumber = 1;
+        let heightLeft = imgHeight;
+        let yPosition = 0;
+        let sourceY = 0;  // Track position in the source canvas
+        let currentPageYPosition = headerHeight;  // Track current Y position on page
+        let pageAdded = false;  // Track if first page is added to prevent empty page
 
-         while (heightLeft > 5) {  // Only continue if there's meaningful content left (>5mm to avoid blank pages)
+        while (heightLeft > 5) {  // Only continue if there's meaningful content left (>5mm to avoid blank pages)
             // Calculate how much of the image fits on this page
             let imageHeightForThisPage = Math.min(usableHeight, heightLeft);
 
@@ -3754,7 +3755,7 @@ export async function generateRecordPDFOffline(record) {
                 if (canStartNewPage && imageHeightForThisPage <= usableHeight * 0.7) {
                     // Only move if current content doesn't fill most of the page
                     // Keep currentPage content and push remaining to next page
-                    (`📄 Smart pagination: Moving short content (${remainingHeight.toFixed(1)}mm) to new page`);
+                    console.log(`📄 Smart pagination: Moving short content (${remainingHeight.toFixed(1)}mm) to new page`);
                 }
             }
 
@@ -3874,17 +3875,17 @@ export async function generateRecordPDFOffline(record) {
             sourceY += imageHeightForThisPage;
             currentPageYPosition = headerHeight + imageHeightForThisPage;  // Update Y position
             pageNumber++;
-            }
+        }
 
-            // Reset currentPageYPosition since we're starting a new page for annexures
-            // (any remaining content < 5mm was not rendered)
-            currentPageYPosition = headerHeight;
+        // Reset currentPageYPosition since we're starting a new page for annexures
+        // (any remaining content < 5mm was not rendered)
+        currentPageYPosition = headerHeight;
 
-            // Helper function to process annexure sections
-            const processAnnexureSection = async (annexureHtmlContent, annexureName, needsNewPage = true) => {
+        // Helper function to process annexure sections
+        const processAnnexureSection = async (annexureHtmlContent, annexureName, needsNewPage = true) => {
             if (!annexureHtmlContent) return;
 
-            (`📄 Processing ${annexureName} section...`);
+            console.log(`📄 Processing ${annexureName} section...`);
 
             // Create container for annexure
             const annexureContainer = document.createElement('div');
@@ -3920,9 +3921,9 @@ export async function generateRecordPDFOffline(record) {
                     pdf.addPage();
                     pageNumber++;
                     currentPageYPosition = headerHeight;
-                    (`📄 Added new page for ${annexureName}`);
+                    console.log(`📄 Added new page for ${annexureName}`);
                 } else {
-                    (`📄 Skipping new page for ${annexureName} - minimal content on current page`);
+                    console.log(`📄 Skipping new page for ${annexureName} - minimal content on current page`);
                     // If on current page with minimal content, just continue on same page
                     // currentPageYPosition already at headerHeight, ready for new content
                 }
@@ -3938,7 +3939,7 @@ export async function generateRecordPDFOffline(record) {
             while (annexureHeightLeft > 0) {
                 // Check if content fits on current page
                 let remainingHeightOnPage = pageHeight - footerHeight - currentPageYPosition;
-                
+
                 if (annexureHeightLeft > remainingHeightOnPage) {
                     // Content doesn't fit, need new page
                     pdf.addPage();
@@ -3986,7 +3987,7 @@ export async function generateRecordPDFOffline(record) {
 
             // Clean up container
             document.body.removeChild(annexureContainer);
-            (`✅ ${annexureName} section added to PDF`);
+            console.log(`✅ ${annexureName} section added to PDF`);
         };
 
         // Process Details of Valuation, Annexure-II, and Annexure-III without blank pages
@@ -4009,28 +4010,49 @@ export async function generateRecordPDFOffline(record) {
         }
 
         // Process Area Images on new page
-    if (areaImagesHtmlContent) {
-                        currentPageYPosition = headerHeight;
-                        await processAnnexureSection(areaImagesHtmlContent, 'Area Images', true);
-                    }
+        if (areaImagesHtmlContent) {
+            currentPageYPosition = headerHeight;
+            await processAnnexureSection(areaImagesHtmlContent, 'Area Images', true);
+        }
 
         // Process Location Images on new page
         if (locationImagesHtmlContent) {
             await processAnnexureSection(locationImagesHtmlContent, 'Location Images', true);
         }
 
-        // Process Supporting Documents on new page
+        // Process Supporting Documents - each on its own page
         if (supportingDocsHtmlContent) {
-                        currentPageYPosition = headerHeight;
+            // Extract individual supporting document pages
+            const docPageRegex = /<div[^>]*supporting-docs-page[^>]*>[\s\S]*?<\/div>/g;
+            const docPages = supportingDocsHtmlContent.match(docPageRegex) || [];
 
-            await processAnnexureSection(supportingDocsHtmlContent, 'Supporting Documents', true);
+            console.log(`📄 Found ${docPages.length} supporting document pages`);
+
+            // Process each document on a new page
+            for (let i = 0; i < docPages.length; i++) {
+                const docHtml = `<div style="width: 100%; height: auto;">${docPages[i]}</div>`;
+
+                // Create new page for each document
+                if (i === 0 && currentPageYPosition > headerHeight) {
+                    pdf.addPage();
+                    pageNumber++;
+                } else if (i > 0) {
+                    pdf.addPage();
+                    pageNumber++;
+                }
+
+                currentPageYPosition = headerHeight;
+
+                // Process single document
+                await processAnnexureSection(docHtml, `Supporting Document ${i + 1}`, false);
+            }
         }
 
-        ('📸 All image sections processed and added to PDF');
+        console.log('📸 All image sections processed and added to PDF');
 
         // Remove the first blank page if no content was added (jsPDF creates with 1 blank page by default)
         if (!pageAdded) {
-            ('⚠️ No content added, removing blank first page');
+            console.log('⚠️ No content added, removing blank first page');
             const totalPages = pdf.getNumberOfPages();
             if (totalPages > 1) {
                 pdf.deletePage(1);
@@ -4041,7 +4063,7 @@ export async function generateRecordPDFOffline(record) {
         const filename = `valuation_${record?.clientName || record?.uniqueId || Date.now()}.pdf`;
         pdf.save(filename);
 
-        ('✅ PDF generated and downloaded:', filename);
+        console.log('✅ PDF generated and downloaded:', filename);
         return filename;
     } catch (error) {
         console.error('❌ Client-side PDF generation error:', error);

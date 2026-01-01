@@ -49,7 +49,6 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
     const { currentPage, itemsPerPage, totalItems } = useSelector((state) => state.pagination);
     const { isLoading } = useSelector((state) => state.loader);
     const [files, setFiles] = useState([]);
-    const [initialLoadComplete, setInitialLoadComplete] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [logoutModalOpen, setLogoutModalOpen] = useState(false);
     const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -68,7 +67,6 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
     const [reworkingRecord, setReworkingRecord] = useState(null);
     const [reworkLoading, setReworkLoading] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [deleteLoading, setDeleteLoading] = useState(false);
     const [rajeshPdfModalOpen, setRajeshPdfModalOpen] = useState(false);
     const [rajeshPdfData, setRajeshPdfData] = useState(null);
     const username = user?.username || "";
@@ -262,23 +260,22 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
     }, [statusFilter, cityFilter, bankFilter, engineerFilter, dispatch]);
 
     // Handle logout - clear files when user logs out
-    useEffect(() => {
-        if (!isLoggedIn) {
-            setFiles([]);
-            setInitialLoadComplete(false);
-            setTimeDurations({});
-            setStatusFilter(null);
-            setCityFilter(null);
-            setBankFilter(null);
-            setEngineerFilter(null);
-            setSortField("createdAt");
-            setSortOrder("desc");
-            setSelectedRows(new Set());
-            setCopiedRows(new Map());
-            dispatch(setTotalItems(0));
-            dispatch(setCurrentPage(1));
-        }
-    }, [isLoggedIn, dispatch]);
+     useEffect(() => {
+         if (!isLoggedIn) {
+             setFiles([]);
+             setTimeDurations({});
+             setStatusFilter(null);
+             setCityFilter(null);
+             setBankFilter(null);
+             setEngineerFilter(null);
+             setSortField("createdAt");
+             setSortOrder("desc");
+             setSelectedRows(new Set());
+             setCopiedRows(new Map());
+             dispatch(setTotalItems(0));
+             dispatch(setCurrentPage(1));
+         }
+     }, [isLoggedIn, dispatch]);
 
     // Initial mount - fetch files ONLY ONCE when user is logged in
     useEffect(() => {
@@ -290,7 +287,7 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
             invalidateCache("/rajesh-house");
             invalidateCache("/rajesh-bank");
             invalidateCache("/rajesh-RowHouse");
-            fetchFiles(true, false);
+            fetchFiles(true, true);
         }
     }, [isLoggedIn]);
 
@@ -353,9 +350,11 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
 
     const fetchFiles = async (isInitial = false, showLoadingIndicator = true) => {
         try {
+            // Show loader BEFORE initiating any API calls
             if (showLoadingIndicator) {
                 dispatch(showLoader("Loading Data..."));
             }
+            
             // Invalidate cache before fetching to ensure fresh data
             invalidateCache("/valuations");
             invalidateCache("/bof-maharashtra");
@@ -451,15 +450,10 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
             dispatch(setTotalItems(filesList.length));
             if (isInitial) {
                 dispatch(setCurrentPage(1));
-                setInitialLoadComplete(true);
             }
             calculateTimeDurations(filesList);
-        } catch (err) {
+            } catch (err) {
             console.error("❌ Dashboard - Error fetching valuations:", err);
-            // Error fetching valuations
-            if (isInitial) {
-                setInitialLoadComplete(true);
-            }
         } finally {
             if (showLoadingIndicator) {
                 dispatch(hideLoader());
@@ -555,13 +549,13 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
                 } catch (reviewError) {
                     console.error("Review and update error:", reviewError);
                     showError(reviewError.message || "Failed to review and update record");
+                    throw reviewError;
                 }
             }
-
-            dispatch(hideLoader());
         } catch (error) {
             console.error("Download error:", error);
             showError(error.message || "Failed to download PDF");
+        } finally {
             dispatch(hideLoader());
         }
     };
@@ -590,10 +584,10 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
             }
 
             showSuccess("Word document downloaded successfully!");
-            dispatch(hideLoader());
         } catch (error) {
             console.error("Download error:", error);
             showError(error.message || "Failed to download Word document");
+        } finally {
             dispatch(hideLoader());
         }
     };
@@ -653,12 +647,10 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
             setReworkingRecord(null);
             // Invalidate cache and fetch fresh data to update status counts
             await fetchFiles(false, false); // Avoid double loader
-            // Force re-render to update status cards
-            dispatch(hideLoader());
         } catch (error) {
             showError(error.message || "Failed to request rework");
-            dispatch(hideLoader());
         } finally {
+            dispatch(hideLoader());
             setReworkLoading(false);
         }
     };
@@ -809,8 +801,9 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
     const handleDeleteSelected = async () => {
         if (selectedRows.size === 0) return;
 
-        setDeleteLoading(true);
         try {
+            dispatch(showLoader("Deleting records..."));
+
             const idsToDelete = Array.from(selectedRows);
 
             // Determine which delete function to use based on formType
@@ -842,12 +835,12 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
             setCopiedRows(new Map());
 
             // Refresh data
-            await fetchFiles(false, true);
+            await fetchFiles(false, false);
         } catch (error) {
             console.error("Error deleting records:", error);
             showError("Failed to delete records");
         } finally {
-            setDeleteLoading(false);
+            dispatch(hideLoader());
         }
     };
 
@@ -1005,12 +998,12 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
                 {/* Unified Premium Container */}
                 <div className="px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10">
                     {/* Search Bar - Mobile Only */}
-                    <div className="sm:hidden mb-6 w-1/2">
-                        <SearchBar data={files} />
-                    </div>
+                     <div className="sm:hidden mb-6 w-1/2">
+                         <SearchBar data={files} />
+                     </div>
 
-                    {/* Premium Unified Card - Table */}
-                    <Card className="overflow-hidden bg-white rounded-3xl border border-slate-200/60 shadow-xl hover:shadow-2xl transition-all duration-300">
+                     {/* Premium Unified Card - Table */}
+                     <Card className="overflow-hidden bg-white rounded-3xl border border-slate-200/60 shadow-xl hover:shadow-2xl transition-all duration-300">
                         {/* Data Table - Premium Styling */}
                         {/* Analytics Section */}
                         {files.length > 0 && (
@@ -1102,26 +1095,7 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
                             </CardHeader>
 
                             <CardContent className="p-3">
-                                 {isLoading || !initialLoadComplete ? (
-                                     <div className="text-center py-24">
-                                         <div className="mb-6 flex justify-center">
-                                             <div className="p-6 bg-gradient-to-br from-slate-200 via-slate-100 to-slate-150 rounded-3xl shadow-lg">
-                                                 <FaSpinner className="h-20 w-20 text-slate-600 animate-spin" />
-                                             </div>
-                                         </div>
-                                         <p className="text-slate-900 font-bold text-2xl tracking-tight">Loading data...</p>
-                                     </div>
-                                 ) : files.length === 0 ? (
-                                     <div className="text-center py-24">
-                                         <div className="mb-6 flex justify-center">
-                                             <div className="p-6 bg-gradient-to-br from-slate-200 via-slate-100 to-slate-150 rounded-3xl shadow-lg">
-                                                 <FaEye className="h-20 w-20 text-slate-600" />
-                                             </div>
-                                         </div>
-                                         <p className="text-slate-900 font-bold text-2xl tracking-tight">No data found</p>
-                                         <p className="text-slate-600 text-sm mt-3 font-medium">Try adjusting your filters or create a new record</p>
-                                     </div>
-                                 ) : paginatedFiles.length > 0 ? (
+                                 {paginatedFiles.length > 0 && (
                                     <>
                                         <div className="overflow-x-auto">
                                             <Table>
@@ -1447,18 +1421,8 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
                                                 onPageChange={(page) => dispatch(setCurrentPage(page))}
                                             />
                                         </div>
-                                    </>
-                                ) : (
-                                    <div className="text-center py-24">
-                                        <div className="mb-6 flex justify-center">
-                                            <div className="p-6 bg-gradient-to-br from-slate-200 via-slate-100 to-slate-150 rounded-3xl shadow-lg">
-                                                <FaEye className="h-20 w-20 text-slate-600" />
-                                            </div>
-                                        </div>
-                                        <p className="text-slate-900 font-bold text-2xl tracking-tight">No records match your filters</p>
-                                        <p className="text-slate-600 text-sm mt-3 font-medium">Try adjusting your filters</p>
-                                    </div>
-                                )}
+                                        </>
+                                        )}
                             </CardContent>
                         </div>
                     </Card>
@@ -1529,16 +1493,16 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
                         <Button
                             variant="outline"
                             onClick={() => setDeleteModalOpen(false)}
-                            disabled={deleteLoading}
+                            disabled={isLoading}
                         >
                             Cancel
                         </Button>
                         <Button
                             variant="destructive"
                             onClick={handleDeleteSelected}
-                            disabled={deleteLoading}
+                            disabled={isLoading}
                         >
-                            {deleteLoading ? "Deleting..." : "Delete"}
+                            {isLoading ? "Deleting..." : "Delete"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

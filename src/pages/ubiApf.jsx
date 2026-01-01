@@ -996,23 +996,21 @@ const UbiApfEditForm = ({ user, onLogin }) => {
 
     // Helper function to navigate to the correct form based on selectedForm or bank name
 
-
-    const handleDownloadPDF = useCallback(async () => {
+const handleDownloadPDF = useCallback(async () => {
         try {
             // Show a temporary loader with message
             dispatch(showLoader());
-
             // ALWAYS fetch fresh data from DB - do not use local state which may be stale
             let dataToDownload;
-
             try {
                 dataToDownload = await getUbiApfFormById(id, username, role, clientId);
-                ('✅ Fresh UBI APF data fetched for PDF:', {
+                console.log(':white_tick: Fresh UBI APF data fetched for PDF:', {
                     bankName: dataToDownload?.bankName,
-                    city: dataToDownload?.city
+                    city: dataToDownload?.city,
+                    supportingDocuments: dataToDownload?.supportingDocuments?.length || 0
                 });
             } catch (fetchError) {
-                console.error('❌ Failed to fetch fresh UBI APF data:', fetchError);
+                console.error(':x: Failed to fetch fresh UBI APF data:', fetchError);
                 // Only fallback to valuation/formData if fetch fails
                 dataToDownload = valuation;
                 if (!dataToDownload) {
@@ -1020,13 +1018,18 @@ const UbiApfEditForm = ({ user, onLogin }) => {
                     dataToDownload = formData;
                 }
             }
-
+            // Ensure documentPreviews is included from local state (has latest unsaved docs)
+            if (documentPreviews && documentPreviews.length > 0) {
+                console.log(':page_facing_up: Merging local documentPreviews:', documentPreviews.length);
+                dataToDownload = {
+                    ...dataToDownload,
+                    documentPreviews: documentPreviews
+                };
+            }
             // Generate PDF (happens quickly on client side)
             await generateUbiApfPDF(dataToDownload);
-
             // Hide loader after PDF is generated
             dispatch(hideLoader());
-
             // Show success with slight delay to ensure loader is hidden
             setTimeout(() => {
                 showSuccess('PDF downloaded successfully');
@@ -1037,7 +1040,6 @@ const UbiApfEditForm = ({ user, onLogin }) => {
             showError('Failed to download PDF');
         }
     }, [id, username, role, clientId, valuation, formData, dispatch, showSuccess, showError]);
-
     useLayoutEffect(() => {
         if (id) loadValuation();
     }, [id]);

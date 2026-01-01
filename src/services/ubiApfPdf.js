@@ -621,7 +621,7 @@ export function generateUbiApfValuationReportHTML(data = {}) {
     const normalizedData = normalizeDataForPDF(data);
 
     // Debug logging to verify data is being received
-    ('🔍 PDF Data Received:', {
+    console.log('🔍 PDF Data Received:', {
         hasData: !!data,
         hasRootFields: {
             uniqueId: !!data?.uniqueId,
@@ -666,7 +666,7 @@ export function generateUbiApfValuationReportHTML(data = {}) {
         const preservedAreaImages = pdfData.areaImages;
         // Get supportImg from localStorage if documentPreviews is empty
         let preservedDocumentPreviews = pdfData.documentPreviews || data.documentPreviews || data.supportingDocuments;
-        ('🔍 Before localStorage check:', {
+        console.log('🔍 Before localStorage check:', {
             hasDocumentPreviews: !!pdfData.documentPreviews,
             documentPreviewsCount: pdfData.documentPreviews ? pdfData.documentPreviews.length : 0,
             hasDataDocumentPreviews: !!data.documentPreviews,
@@ -675,7 +675,7 @@ export function generateUbiApfValuationReportHTML(data = {}) {
         if (!preservedDocumentPreviews || preservedDocumentPreviews.length === 0) {
             try {
                 const supportImgFromStorage = localStorage.getItem('supportImg');
-                ('🔍 localStorage supportImg:', {
+                console.log('🔍 localStorage supportImg:', {
                     exists: !!supportImgFromStorage,
                     length: supportImgFromStorage ? supportImgFromStorage.length : 0
                 });
@@ -683,7 +683,7 @@ export function generateUbiApfValuationReportHTML(data = {}) {
                     const parsed = JSON.parse(supportImgFromStorage);
                     if (Array.isArray(parsed) && parsed.length > 0) {
                         preservedDocumentPreviews = parsed;
-                        ('📦 Loaded supportImg from localStorage:', parsed.length, 'images', parsed.map(p => ({ url: p.url ? 'YES' : 'NO', fileName: p.fileName })));
+                        console.log('📦 Loaded supportImg from localStorage:', parsed.length, 'images', parsed.map(p => ({ url: p.url ? 'YES' : 'NO', fileName: p.fileName })));
                     }
                 }
             } catch (e) {
@@ -711,7 +711,7 @@ export function generateUbiApfValuationReportHTML(data = {}) {
         }
 
         // Debug: Log what we have after merge
-        ('📄 Document Previews after pdfDetails merge:', {
+        console.log('📄 Document Previews after pdfDetails merge:', {
             preserved: preservedDocumentPreviews ? preservedDocumentPreviews.length : 0,
             pdfData: pdfData.documentPreviews ? pdfData.documentPreviews.length : 0,
             sample: pdfData.documentPreviews && pdfData.documentPreviews[0] ? { url: pdfData.documentPreviews[0].url ? 'YES' : 'NO', hasPreview: !!pdfData.documentPreviews[0].preview } : null
@@ -734,23 +734,23 @@ export function generateUbiApfValuationReportHTML(data = {}) {
         // Ensure total fields are explicitly mapped
         if (data.pdfDetails.totalBuiltUpSqm) {
             pdfData.totalBuiltUpSqm = data.pdfDetails.totalBuiltUpSqm;
-            ('[PDF Generation] Mapped totalBuiltUpSqm:', pdfData.totalBuiltUpSqm);
+            console.log('[PDF Generation] Mapped totalBuiltUpSqm:', pdfData.totalBuiltUpSqm);
         }
         if (data.pdfDetails.totalBuiltUpSqft) {
             pdfData.totalBuiltUpSqft = data.pdfDetails.totalBuiltUpSqft;
-            ('[PDF Generation] Mapped totalBuiltUpSqft:', pdfData.totalBuiltUpSqft);
+            console.log('[PDF Generation] Mapped totalBuiltUpSqft:', pdfData.totalBuiltUpSqft);
         }
         if (data.pdfDetails.totalFloorAreaBalconySqm) {
             pdfData.totalFloorAreaBalconySqm = data.pdfDetails.totalFloorAreaBalconySqm;
-            ('[PDF Generation] Mapped totalFloorAreaBalconySqm:', pdfData.totalFloorAreaBalconySqm);
+            console.log('[PDF Generation] Mapped totalFloorAreaBalconySqm:', pdfData.totalFloorAreaBalconySqm);
         }
         if (data.pdfDetails.totalFloorAreaBalconySqft) {
             pdfData.totalFloorAreaBalconySqft = data.pdfDetails.totalFloorAreaBalconySqft;
-            ('[PDF Generation] Mapped totalFloorAreaBalconySqft:', pdfData.totalFloorAreaBalconySqft);
+            console.log('[PDF Generation] Mapped totalFloorAreaBalconySqft:', pdfData.totalFloorAreaBalconySqft);
         }
 
         // DEBUG: Log field mapping
-        ('🔧 Field Mapping Debug:', {
+        console.log('🔧 Field Mapping Debug:', {
             allPdfDetailsKeys: Object.keys(data.pdfDetails),
             classificationPosh: data.pdfDetails.classificationPosh,
             unitMaintenance: data.pdfDetails.unitMaintenance,
@@ -872,7 +872,7 @@ export function generateUbiApfValuationReportHTML(data = {}) {
                 pdfData.pdfDetails?.classificationOwnership ||
                 data?.pdfDetails?.ownerOccupancyStatus ||
                 data?.unitClassification?.ownerOccupiedOrLetOut;
-            ('⚠️ ownerOccupiedOrLetOut mapping:', {
+            console.log('⚠️ ownerOccupiedOrLetOut mapping:', {
                 'pdfData.ownerOccupiedOrLetOut': pdfData.ownerOccupiedOrLetOut,
                 'pdfData.ownerOccupancyStatus': pdfData.ownerOccupancyStatus,
                 'data.ownerOccupancyStatus': data?.ownerOccupancyStatus,
@@ -1023,10 +1023,22 @@ export function generateUbiApfValuationReportHTML(data = {}) {
         engineerName: pdfData.engineerName,
         notes: pdfData.notes,
 
-        // Images and Documents
-        propertyImages: pdfData.propertyImages || [],
-        locationImages: pdfData.locationImages || [],
-        documentPreviews: pdfData.documentPreviews || [],
+        // Images and Documents - with debug logging
+        propertyImages: (() => {
+            const result = pdfData.propertyImages || data?.propertyImages || [];
+            console.log('🖼️ propertyImages final:', { has: result.length > 0, count: result.length });
+            return result;
+        })(),
+        locationImages: (() => {
+            const result = pdfData.locationImages || data?.locationImages || [];
+            console.log('📍 locationImages final:', { has: result.length > 0, count: result.length, sample: result.slice(0, 1) });
+            return result;
+        })(),
+        documentPreviews: (() => {
+            const result = pdfData.documentPreviews || data?.documentPreviews || data?.supportingDocuments || [];
+            console.log('📄 documentPreviews final:', { has: result.length > 0, count: result.length, sample: result.slice(0, 1) });
+            return result;
+        })(),
 
         // Custom Fields
         customFields: Array.isArray(pdfData.customFields) ? pdfData.customFields : [],
@@ -1037,7 +1049,7 @@ export function generateUbiApfValuationReportHTML(data = {}) {
     };
 
     // Debug: Log critical fields for troubleshooting
-    ('🔍 PDF Field Extraction Debug:', {
+    console.log('🔍 PDF Field Extraction Debug:', {
         areaClassification: pdfData.areaClassification,
         postalAddress: pdfData.postalAddress,
         postalAddressRaw: data?.postalAddress,
@@ -1057,7 +1069,7 @@ export function generateUbiApfValuationReportHTML(data = {}) {
     });
 
     // DEBUG: Log final pdfData before rendering
-    ('📋 Final pdfData before HTML rendering:', {
+    console.log('📋 Final pdfData before HTML rendering:', {
         unitMaintenance: pdfData.unitMaintenance,
         unitClassification: pdfData.unitClassification,
         classificationPosh: pdfData.classificationPosh,
@@ -1086,7 +1098,7 @@ export function generateUbiApfValuationReportHTML(data = {}) {
     });
 
     // Auto-calculate total built up area if not provided
-    ('[PDF CALC] totalBuiltUpSqm status:', {
+    console.log('[PDF CALC] totalBuiltUpSqm status:', {
         current: pdfData.totalBuiltUpSqm,
         isEmpty: !pdfData.totalBuiltUpSqm || pdfData.totalBuiltUpSqm === 'NA' || pdfData.totalBuiltUpSqm === ''
     });
@@ -1100,7 +1112,7 @@ export function generateUbiApfValuationReportHTML(data = {}) {
             : 0;
 
         const totalSqm = basementSqm + groundSqm + firstSqm + customSqm;
-        ('[PDF CALC] totalBuiltUpSqm breakdown:', {
+        console.log('[PDF CALC] totalBuiltUpSqm breakdown:', {
             basementSqm, groundSqm, firstSqm, customCount: pdfData.customExtentOfSiteFields?.length || 0, customSqm, totalSqm
         });
         if (totalSqm > 0) {
@@ -1119,12 +1131,12 @@ export function generateUbiApfValuationReportHTML(data = {}) {
         const totalSqft = basementSqft + groundSqft + firstSqft + customSqft;
         if (totalSqft > 0) {
             pdfData.totalBuiltUpSqft = totalSqft.toFixed(2);
-            ('[PDF] Auto-calculated totalBuiltUpSqft:', pdfData.totalBuiltUpSqft);
+            console.log('[PDF] Auto-calculated totalBuiltUpSqft:', pdfData.totalBuiltUpSqft);
         }
     }
 
     // Auto-calculate total floor area including balcony if not provided
-    ('[PDF CALC] totalFloorAreaBalconySqm status:', {
+    console.log('[PDF CALC] totalFloorAreaBalconySqm status:', {
         current: pdfData.totalFloorAreaBalconySqm,
         isEmpty: !pdfData.totalFloorAreaBalconySqm || pdfData.totalFloorAreaBalconySqm === 'NA' || pdfData.totalFloorAreaBalconySqm === ''
     });
@@ -1138,7 +1150,7 @@ export function generateUbiApfValuationReportHTML(data = {}) {
             : 0;
 
         const totalSqm = basementSqm + groundSqm + firstSqm + customSqm;
-        ('[PDF CALC] totalFloorAreaBalconySqm breakdown:', {
+        console.log('[PDF CALC] totalFloorAreaBalconySqm breakdown:', {
             basementSqm, groundSqm, firstSqm, customCount: pdfData.customFloorAreaBalconyFields?.length || 0, customSqm, totalSqm
         });
         if (totalSqm > 0) {
@@ -1157,7 +1169,7 @@ export function generateUbiApfValuationReportHTML(data = {}) {
         const totalSqft = basementSqft + groundSqft + firstSqft + customSqft;
         if (totalSqft > 0) {
             pdfData.totalFloorAreaBalconySqft = totalSqft.toFixed(2);
-            ('[PDF] Auto-calculated totalFloorAreaBalconySqft:', {
+            console.log('[PDF] Auto-calculated totalFloorAreaBalconySqft:', {
                 basementSqft,
                 groundSqft,
                 firstSqft,
@@ -2748,13 +2760,13 @@ export function generateUbiApfValuationReportHTML(data = {}) {
         </p>
 
         <!-- PLACE / SIGNATURE -->
-         <div style="display: flex; justify-content: space-between; margin-top: 40px;" class="no-break">
+         <div style="display: flex; justify-content: space-between; margin-top: 30px;" class="no-break">
 
              <div style="width: 50%;">
                  <p style="font-weight: bold;">Place: ${safeGet(data, 'city', 'NA')}</p>
                  <p style="font-weight: bold;">Date: ${formatDate(pdfData.dateOnWhichValuationIsMade || pdfData.dateOnWhichValuationIsMade)}</p>
              </div>
-        <div style="width: 50%; text-align: right; margin-top: 70px;">
+        <div style="width: 50%; text-align: right; margin-top: 60px;">
         <p >Shashikant R. Dhumal</p>
         <p>Signature of Approved Valuer</p>
         <p>Engineer & Govt. Approved Valuer</p>
@@ -3009,8 +3021,8 @@ export function generateUbiApfValuationReportHTML(data = {}) {
     <thead>
         <tr style="background: #ffffffff;">
             <td style="border: 1px solid #000; padding: 5px; font-weight: bold; width: 5%; text-align: center;">Sr. No.</td>
-            <td style="border: 1px solid #000; padding: 5px; font-weight: bold; width: 35%;">Particulars</td>
-            <td style="border: 1px solid #000; padding: 5px; font-weight: bold; width: 60%;">Valuer comment</td>
+            <td style="border: 1px solid #000; padding: 5px; font-weight: bold; width: 45%;">Particulars</td>
+            <td style="border: 1px solid #000; padding: 5px; font-weight: bold; width: 50%;">Valuer comment</td>
         </tr>
     </thead>
     <tbody>
@@ -3051,14 +3063,14 @@ available for our perusals.
         <tbody>
        
         <tr>
-           <td style="border: 1px solid #000; padding: 5px; text-align: center;">4</td>
+           <td style="border: 1px solid #000; padding: 5px; text-align: center; width: 5%">4</td>
            <td style="border: 1px solid #000; padding: 5px;">Disclosure of valuer interest or conflict, if any;</td>
            <td style="border: 1px solid #000; padding: 5px; font-size: 9.5pt;">
                NO
            </td>
         </tr>
         <tr>
-           <td style="border: 1px solid #000; padding: 5px; text-align: center;">5</td>
+           <td style="border: 1px solid #000; padding: 5px; text-align: center; width: 5%">5</td>
            <td style="border: 1px solid #000; padding: 5px;">Date of appointment, valuation date and date of report;</td>
            <td style="border: 1px solid #000; padding: 5px; font-size: 9.5pt;">
                ${(() => {
@@ -3069,7 +3081,7 @@ available for our perusals.
            </td>
         </tr>
         <tr>
-           <td style="border: 1px solid #000; padding: 5px; text-align: center;">6</td>
+           <td style="border: 1px solid #000; padding: 5px; text-align: center; width: 5%">6</td>
            <td style="border: 1px solid #000; padding: 5px;">Inspections and/or investigations undertaken;</td>
            <td style="border: 1px solid #000; padding: 5px; font-size: 9.5pt;">
                ${pdfData.inspectionDetails ||
@@ -3077,7 +3089,7 @@ available for our perusals.
            </td>
         </tr>
         <tr>
-           <td style="border: 1px solid #000; padding: 5px; text-align: center;">7</td>
+           <td style="border: 1px solid #000; padding: 5px; text-align: center; width: 5%">7</td>
            <td style="border: 1px solid #000; padding: 5px;">Nature and sources of the information used or relied upon;</td>
            <td style="border: 1px solid #000; padding: 5px; font-size: 9.5pt;">
                ${pdfData.informationSources ||
@@ -3086,7 +3098,7 @@ available for our perusals.
            </td>
         </tr>
         <tr>
-           <td style="border: 1px solid #000; padding: 5px; text-align: center;">8</td>
+           <td style="border: 1px solid #000; padding: 5px; text-align: center; width: 5%">8</td>
            <td style="border: 1px solid #000; padding: 5px;">Procedures adopted in carrying out the valuation and valuation standards followed;</td>
            <td style="border: 1px solid #000; padding: 5px; font-size: 9.5pt;">
                ${pdfData.valuationProcedures ||
@@ -3095,7 +3107,7 @@ available for our perusals.
            </td>
         </tr>
         <tr>
-           <td style="border: 1px solid #000; padding: 5px; text-align: center;">9</td>
+           <td style="border: 1px solid #000; padding: 5px; text-align: center; width: 5%">9</td>
            <td style="border: 1px solid #000; padding: 5px;">Restrictions on use of the report, if any;</td>
            <td style="border: 1px solid #000; padding: 5px; font-size: 9.5pt;">
                ${pdfData.reportRestrictions ||
@@ -3104,7 +3116,7 @@ available for our perusals.
            </td>
         </tr>
         <tr>
-           <td style="border: 1px solid #000; padding: 5px; text-align: center;">10</td>
+           <td style="border: 1px solid #000; padding: 5px; text-align: center; width: 5%">10</td>
            <td style="border: 1px solid #000; padding: 5px;">Major factors that were taken into account during the valuation;</td>
            <td style="border: 1px solid #000; padding: 5px; font-size: 9.5pt;">
                ${pdfData.majorValuationFactors ||
@@ -3113,7 +3125,7 @@ available for our perusals.
            </td>
         </tr>
         <tr>
-           <td style="border: 1px solid #000; padding: 5px; text-align: center;">11</td>
+           <td style="border: 1px solid #000; padding: 5px; text-align: center; width: 5%">11</td>
            <td style="border: 1px solid #000; padding: 5px;">Major risks that were taken into account during the valuation;</td>
            <td style="border: 1px solid #000; padding: 5px; font-size: 9.5pt;">
                ${pdfData.majorValuationRisks ||
@@ -3122,7 +3134,7 @@ available for our perusals.
            </td>
         </tr>
         <tr>
-           <td style="border: 1px solid #000; padding: 5px; text-align: center;">12</td>
+           <td style="border: 1px solid #000; padding: 5px; text-align: center; width: 5%">12</td>
            <td style="border: 1px solid #000; padding: 5px;">Caveats, limitations and disclaimers to the extent they explain or elucidate the limitations faced by valuer, which shall not be for the purpose of limiting his responsibility for the valuation report.</td>
            <td style="border: 1px solid #000; padding: 5px; font-size: 9.5pt;">
                ${pdfData.caveatsLimitations ||
@@ -3279,29 +3291,29 @@ valuer organization discredits the profession.  </p>
 
     ${pdfData.areaImages && typeof pdfData.areaImages === 'object' && Object.keys(pdfData.areaImages).length > 0 ? `
     ${(() => {
-        let allImages = [];
-        let globalIdx = 0;
-        Object.entries(pdfData.areaImages).forEach(([areaName, areaImageList]) => {
-            if (Array.isArray(areaImageList)) {
-                areaImageList.forEach((img, idx) => {
-                    const imgSrc = typeof img === 'string' ? img : (img?.url || img?.preview || img?.data || img?.src || '');
-                    if (imgSrc) {
-                        allImages.push({
-                            src: imgSrc,
-                            label: areaName + ' - Image ' + (idx + 1),
-                            globalIdx: globalIdx++
+                let allImages = [];
+                let globalIdx = 0;
+                Object.entries(pdfData.areaImages).forEach(([areaName, areaImageList]) => {
+                    if (Array.isArray(areaImageList)) {
+                        areaImageList.forEach((img, idx) => {
+                            const imgSrc = typeof img === 'string' ? img : (img?.url || img?.preview || img?.data || img?.src || '');
+                            if (imgSrc) {
+                                allImages.push({
+                                    src: imgSrc,
+                                    label: areaName + ' - Image ' + (idx + 1),
+                                    globalIdx: globalIdx++
+                                });
+                            }
                         });
                     }
                 });
-            }
-        });
-        
-        let pages = [];
-        for (let i = 0; i < allImages.length; i += 6) {
-            pages.push(allImages.slice(i, i + 6));
-        }
-        
-        return pages.map((pageImages, pageIdx) => `
+
+                let pages = [];
+                for (let i = 0; i < allImages.length; i += 6) {
+                    pages.push(allImages.slice(i, i + 6));
+                }
+
+                return pages.map((pageImages, pageIdx) => `
         <div class="page images-section area-images-page" style="page-break-before: always; page-break-after: always; break-before: page; break-after: page; page-break-inside: avoid;">
              <div style="padding: 8px; font-size: 12pt;">
                  ${pageIdx === 0 ? '<h2 style="text-align: center; margin: 0 0 8px 0; font-weight: bold;">PROPERTY AREA IMAGES</h2>' : ''}
@@ -3314,40 +3326,38 @@ valuer organization discredits the profession.  </p>
                  </div>
              </div>
         </div>`).join('');
-    })()}
+            })()}
      ` : ''}
 
+   <!-- LOCATION IMAGES: Each image gets its own page -->
    ${Array.isArray(pdfData.locationImages) && pdfData.locationImages.length > 0 ? `
-    <div class="page images-section location-images-page" style="page-break-before: always; break-before: page; padding: 10px 20px; margin: 0; display: block;">
-        <h2 style="text-align: center; margin: 0 0 20px 0; font-weight: bold; page-break-after: avoid;">LOCATION IMAGES</h2>
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-            ${pdfData.locationImages.map((img, idx) => {
-        const imgSrc = typeof img === 'string' ? img : img?.url;
-        return imgSrc ? `
-                <div class="image-container" style="page-break-inside: avoid; break-inside: avoid; page-break-after: always; border: 1px solid #ddd; padding: 10px; background: #fafafa; flex-shrink: 0;">
-                    <img class="pdf-image" src="${imgSrc}" alt="Location Image ${idx + 1}" style="width: 100%; height: auto; max-height: 500px; object-fit: contain;">
-                </div>
-                ` : '';
-                }).join('')}
+     ${pdfData.locationImages.map((img, idx) => {
+                const imgSrc = typeof img === 'string' ? img : img?.url;
+                return imgSrc ? `
+         <div class="page" location-images-page style="width: 100%; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;">
+           <h2 style="text-align: center; margin-bottom: 30px; font-weight: bold; font-size: 18pt;">LOCATION IMAGE ${idx + 1}</h2>
+           <img class="pdf-image" src="${imgSrc}" alt="Location Image ${idx + 1}" style="width: 90%; height: auto; max-height: 600px; object-fit: contain; margin: 0 auto;">
          </div>
-     </div>
-      ` : ''}
+       ` : '';
+            }).join('')}
+   ` : ''}
 
-   
-
-    ${Array.isArray(pdfData.documentPreviews) && pdfData.documentPreviews.length > 0 ? `
+   <!-- SUPPORTING DOCUMENTS: Each document gets its own page -->
+     ${Array.isArray(pdfData.documentPreviews) && pdfData.documentPreviews.length > 0 ? `
+     <div class="supporting-docs-section">
     ${pdfData.documentPreviews.map((img, idx) => {
-        const imgSrc = typeof img === 'string' ? img : img?.url;
-        return imgSrc ? `
-        <div class="page images-section supporting-docs-page" style="page-break-before: always; break-before: page; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 45vh; padding: 20px;">
-            ${idx === 0 ? '<h2 style="text-align: center; margin-bottom: 30px; font-weight: bold; width: 100%;">DOCUMENTS IMG</h2>' : ''}
-            <div class="image-container" style="border: 1px solid #ddd; padding: 10px; background: #fafafa; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 80%; max-width: 800px;">
-                <img class="pdf-image" src="${imgSrc}" alt="Supporting Document ${idx + 1}" style="width: 100%; height: auto; max-height: 600px; object-fit: contain;">
-                <p style="margin: 10px 0 0 0; font-size: 10pt; color: #666;">Document ${idx + 1}</p>
+                const imgSrc = typeof img === 'string' ? img : img?.url;
+                return imgSrc ? `
+        <div class="page images-section supporting-docs-page" style="page-break-before: always; break-before: page; width: 100%; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+            ${idx === 0 ? '<h2 style="text-align: center; margin-bottom: 30px; font-weight: bold; width: 100%; font-size: 18pt;">SUPPORTING DOCUMENTS</h2>' : ''}
+            <div class="image-container" style="border: 1px solid #ddd; padding: 10px; background: #fafafa; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 90%; max-width: 800px; height: auto;">
+                <img class="pdf-image" src="${imgSrc}" alt="Supporting Document ${idx + 1}" style="width: 100%; height: auto; max-height: 550px; object-fit: contain; margin: 0 auto;">
+                <p style="margin: 10px 0 0 0; font-size: 10pt; color: #666; text-align: center;">Document ${idx + 1}</p>
             </div>
         </div>
         ` : '';
-    }).join('')}
+            }).join('')}
+     </div>
      ` : ''}
 
     </body>
@@ -3357,7 +3367,7 @@ valuer organization discredits the profession.  </p>
 
 export async function generateUbiApfRecordPDF(record) {
     try {
-        ('📄 Generating PDF for record:', record?.uniqueId || record?.clientName || 'new');
+        console.log('📄 Generating PDF for record:', record?.uniqueId || record?.clientName || 'new');
         return await generateUbiApfRecordPDFOffline(record);
     } catch (error) {
         console.error('❌ PDF generation error:', error);
@@ -3371,7 +3381,7 @@ export async function generateUbiApfRecordPDF(record) {
  */
 export async function previewUbiApfValuationPDF(record) {
     try {
-        ('👁️ Generating PDF preview for:', record?.uniqueId || record?.clientName || 'new');
+        console.log('👁️ Generating PDF preview for:', record?.uniqueId || record?.clientName || 'new');
 
         // Dynamically import jsPDF and html2canvas
         const { jsPDF } = await import('jspdf');
@@ -3434,7 +3444,7 @@ export async function previewUbiApfValuationPDF(record) {
         const url = window.URL.createObjectURL(blob);
         window.open(url, '_blank');
 
-        ('✅ PDF preview opened');
+        console.log('✅ PDF preview opened');
         return url;
     } catch (error) {
         console.error('❌ PDF preview error:', error);
@@ -3499,7 +3509,7 @@ const urlToBase64 = async (url) => {
     try {
         // Check if URL is already a data URI
         if (url.startsWith('data:')) {
-            ('✅ URL is already a data URI, skipping conversion');
+            console.log('✅ URL is already a data URI, skipping conversion');
             return url;
         }
 
@@ -3508,7 +3518,7 @@ const urlToBase64 = async (url) => {
 
         // Compress image to reduce size
         const compressed = await compressImage(blob);
-        ('✅ Converted image URL to base64:', url.substring(0, 80) + '...');
+        console.log('✅ Converted image URL to base64:', url.substring(0, 80) + '...');
         return compressed;
     } catch (error) {
         console.warn('⚠️ Failed to convert image URL to base64, using original URL:', url.substring(0, 80), error.message);
@@ -3561,7 +3571,7 @@ const convertImagesToBase64 = async (record) => {
 
     // Convert supporting documents (from documentPreviews or supportingDocuments)
     const docsArray = recordCopy.documentPreviews || recordCopy.supportingDocuments;
-    ('📄 Document conversion check:', {
+    console.log('📄 Document conversion check:', {
         hasDocumentPreviews: Array.isArray(recordCopy.documentPreviews),
         documentPreviewsCount: Array.isArray(recordCopy.documentPreviews) ? recordCopy.documentPreviews.length : 0,
         hasSupportingDocuments: Array.isArray(recordCopy.supportingDocuments),
@@ -3575,7 +3585,7 @@ const convertImagesToBase64 = async (record) => {
                 if (!doc) return doc;
                 const url = typeof doc === 'string' ? doc : doc?.url;
                 if (!url) {
-                    (`⚠️ Document #${ idx + 1 } has no URL`, doc);
+                    console.log(`⚠️ Document #${idx + 1} has no URL`, doc);
                     return doc;
                 }
 
@@ -3589,7 +3599,7 @@ const convertImagesToBase64 = async (record) => {
         // Store in both possible field names for compatibility
         recordCopy.documentPreviews = convertedDocs;
         recordCopy.supportingDocuments = convertedDocs;
-        ('✅ Converted', convertedDocs.length, 'supporting documents to base64');
+        console.log('✅ Converted', convertedDocs.length, 'supporting documents to base64');
     }
 
     return recordCopy;
@@ -3601,14 +3611,14 @@ const convertImagesToBase64 = async (record) => {
  */
 export async function generateUbiApfRecordPDFOffline(record) {
     try {
-        ('📠 Generating PDF (client-side mode)');
-        ('📄 INITIAL RECORD CHECK - Supporting Documents:', {
+        console.log('📠 Generating PDF (client-side mode)');
+        console.log('📄 INITIAL RECORD CHECK - Supporting Documents:', {
             hasDocumentPreviews: record?.documentPreviews?.length || 0,
             hasSupportingDocuments: record?.supportingDocuments?.length || 0,
             documentPreviews: record?.documentPreviews?.slice(0, 1),
             supportingDocuments: record?.supportingDocuments?.slice(0, 1)
         });
-        ('📊 Input Record Structure:', {
+        console.log('📊 Input Record Structure:', {
             recordKeys: Object.keys(record || {}),
             rootFields: {
                 uniqueId: record?.uniqueId,
@@ -3642,11 +3652,11 @@ export async function generateUbiApfRecordPDFOffline(record) {
         });
 
         // Convert images to base64 for PDF embedding
-        ('🖼️ Converting images to base64...');
+        console.log('🖼️ Converting images to base64...');
         const recordWithBase64Images = await convertImagesToBase64(record);
 
         // Debug: Check what we have after conversion
-        ('✅ After conversion:', {
+        console.log('✅ After conversion:', {
             hasDocumentPreviews: recordWithBase64Images?.documentPreviews?.length || 0,
             hasSupportingDocuments: recordWithBase64Images?.supportingDocuments?.length || 0,
             documentPreviewsSample: recordWithBase64Images?.documentPreviews?.[0],
@@ -3669,13 +3679,13 @@ export async function generateUbiApfRecordPDFOffline(record) {
         const locationImagesIndex = htmlContent.indexOf('location-images-page');
         const supportingDocsIndex = htmlContent.indexOf('supporting-docs-page');
 
-        (`🔍 Detected cost - of - construction - section at index: ${ costOfConstructionIndex } `);
-        (`🔍 Detected annexure - ii - section at index: ${ annexure2Index } `);
-        (`🔍 Detected annexure - iii - section at index: ${ annexure3Index } `);
-        (`🔍 Detected property - images - page at index: ${ propertyImagesIndex } `);
-        (`🔍 Detected area - images - page at index: ${ areaImagesIndex } `);
-        (`🔍 Detected location - images - page at index: ${ locationImagesIndex } `);
-        (`🔍 Detected supporting - docs - page at index: ${ supportingDocsIndex } `);
+        console.log(`🔍 Detected cost - of - construction - section at index: ${costOfConstructionIndex} `);
+        console.log(`🔍 Detected annexure - ii - section at index: ${annexure2Index} `);
+        console.log(`🔍 Detected annexure - iii - section at index: ${annexure3Index} `);
+        console.log(`🔍 Detected property - images - page at index: ${propertyImagesIndex} `);
+        console.log(`🔍 Detected area - images - page at index: ${areaImagesIndex} `);
+        console.log(`🔍 Detected location - images - page at index: ${locationImagesIndex} `);
+        console.log(`🔍 Detected supporting - docs - page at index: ${supportingDocsIndex} `);
 
         let mainHtmlContent = htmlContent;
         let costOfConstructionHtmlContent = '';
@@ -3729,7 +3739,7 @@ export async function generateUbiApfRecordPDFOffline(record) {
                     supportingDocsHtmlContent = sectionContent;
                 }
             }
-            ('✂️ Split HTML: Sections separated - Main Content, Cost of Construction, Annexure-II, Annexure-III, Property Images, Area Images, Location Images, Supporting Docs');
+            console.log('✂️ Split HTML: Sections separated - Main Content, Cost of Construction, Annexure-II, Annexure-III, Property Images, Area Images, Location Images, Supporting Docs');
         }
 
         // Remove separated sections from main content to prevent duplication
@@ -3757,7 +3767,7 @@ export async function generateUbiApfRecordPDFOffline(record) {
         cleanMainContent = cleanMainContent.replace(/<div[^>]*supporting-docs-page[^>]*>[\s\S]*?<\/div>/g, '');
 
         mainHtmlContent = cleanMainContent;
-        ('🗑️ Removed separated sections from main content to prevent duplication');
+        console.log('🗑️ Removed separated sections from main content to prevent duplication');
 
         // Create a temporary container with cleaned main content only
         const container = document.createElement('div');
@@ -3783,11 +3793,11 @@ export async function generateUbiApfRecordPDFOffline(record) {
 
             // If image has no src or invalid src, mark container for removal
             if (!src || !src.trim() || src === 'undefined' || src === 'null') {
-                (`⏭️ Invalid image src: ${ alt } `);
+                console.log(`⏭️ Invalid image src: ${alt} `);
                 let parentContainer = img.closest('.image-container');
                 if (parentContainer) {
                     imagesToRemove.add(parentContainer);
-                    (`⏭️ Marking for removal(invalid src): ${ alt } `);
+                    console.log(`⏭️ Marking for removal(invalid src): ${alt} `);
                 }
             }
         });
@@ -3799,11 +3809,11 @@ export async function generateUbiApfRecordPDFOffline(record) {
                 const timeoutId = setTimeout(() => {
                     // If image hasn't loaded after 5 seconds, mark for removal
                     if (!img.complete || img.naturalHeight === 0) {
-                        (`⏭️ Image timeout / failed to load: ${ alt } `);
+                        console.log(`⏭️ Image timeout / failed to load: ${alt} `);
                         let parentContainer = img.closest('.image-container');
                         if (parentContainer) {
                             imagesToRemove.add(parentContainer);
-                            (`⏭️ Marking for removal(timeout): ${ alt } `);
+                            console.log(`⏭️ Marking for removal(timeout): ${alt} `);
                         }
                     }
                     resolve();
@@ -3811,17 +3821,17 @@ export async function generateUbiApfRecordPDFOffline(record) {
 
                 img.onload = () => {
                     clearTimeout(timeoutId);
-                    (`✅ Image loaded successfully: ${ alt } `);
+                    console.log(`✅ Image loaded successfully: ${alt} `);
                     resolve();
                 };
 
                 img.onerror = () => {
                     clearTimeout(timeoutId);
-                    (`❌ Image failed to load: ${ alt } `);
+                    console.log(`❌ Image failed to load: ${alt} `);
                     let parentContainer = img.closest('.image-container');
                     if (parentContainer) {
                         imagesToRemove.add(parentContainer);
-                        (`⏭️ Marking for removal(onerror): ${ alt } `);
+                        console.log(`⏭️ Marking for removal(onerror): ${alt} `);
                     }
                     resolve();
                 };
@@ -3830,14 +3840,14 @@ export async function generateUbiApfRecordPDFOffline(record) {
                 if (img.complete) {
                     clearTimeout(timeoutId);
                     if (img.naturalHeight === 0) {
-                        (`⏭️ Image failed(no height): ${ alt } `);
+                        console.log(`⏭️ Image failed(no height): ${alt} `);
                         let parentContainer = img.closest('.image-container');
                         if (parentContainer) {
                             imagesToRemove.add(parentContainer);
-                            (`⏭️ Marking for removal(no height): ${ alt } `);
+                            console.log(`⏭️ Marking for removal(no height): ${alt} `);
                         }
                     } else {
-                        (`✅ Image already loaded: ${ alt } `);
+                        console.log(`✅ Image already loaded: ${alt} `);
                     }
                     resolve();
                 }
@@ -3845,19 +3855,19 @@ export async function generateUbiApfRecordPDFOffline(record) {
         }));
 
         // Remove only failed/invalid image containers
-        (`🗑️ Removing ${ imagesToRemove.size } failed / invalid image containers`);
+        console.log(`🗑️ Removing ${imagesToRemove.size} failed / invalid image containers`);
         imagesToRemove.forEach(el => {
             const alt = el.querySelector('img')?.getAttribute('alt') || 'unknown';
-            (`✂️ Removed container: ${ alt } `);
+            console.log(`✂️ Removed container: ${alt} `);
             el.remove();
         });
 
-        ('✅ Image validation complete - now extracting images BEFORE rendering...');
+        console.log('✅ Image validation complete - now extracting images BEFORE rendering...');
 
         // CRITICAL: Render continuous-wrapper and .page elements separately for proper page breaks
         const continuousWrapper = container.querySelector('.continuous-wrapper');
         const pageElements = Array.from(container.querySelectorAll(':scope > .page'));
-        (`📄 Total.page elements found: ${ pageElements.length } `);
+        console.log(`📄 Total.page elements found: ${pageElements.length} `);
 
         // Render continuous wrapper first
         let mainCanvas = null;
@@ -3881,745 +3891,726 @@ export async function generateUbiApfRecordPDFOffline(record) {
                     });
                 }
             });
-            ('✅ Continuous wrapper canvas conversion complete');
+            console.log('✅ Continuous wrapper canvas conversion complete');
         }
 
         // Render each .page separately for proper page breaks
         const pageCanvases = [];
         for (let i = 0; i < pageElements.length; i++) {
             const pageEl = pageElements[i];
-            (`📄 Rendering.page element ${ i + 1 }/${pageElements.length}`);
+            console.log(`📄 Rendering.page element ${i + 1}/${pageElements.length}`);
 
-                        // Temporarily remove padding to render from top
-                        const originalPadding = pageEl.style.padding;
-                        pageEl.style.padding = '0';
-                        pageEl.style.margin = '0';
+            // Temporarily remove padding to render from top
+            const originalPadding = pageEl.style.padding;
+            pageEl.style.padding = '0';
+            pageEl.style.margin = '0';
 
-                        const pageCanvas = await html2canvas(pageEl, {
-                            scale: 1.5,
-                            useCORS: true,
-                            logging: false,
-                            backgroundColor: '#ffffff',
-                            allowTaint: true,
-                            imageTimeout: 10000,
-                            windowHeight: pageEl.scrollHeight,
-                            windowWidth: 793,
-                            x: 0,
-                            y: 0,
-                            onclone: (clonedDocument) => {
-                                const clonedPageEl = clonedDocument.querySelector('.page') || clonedDocument;
-                                clonedPageEl.style.padding = '0';
-                                clonedPageEl.style.margin = '0';
+            const pageCanvas = await html2canvas(pageEl, {
+                scale: 1.5,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff',
+                allowTaint: true,
+                imageTimeout: 10000,
+                windowHeight: pageEl.scrollHeight,
+                windowWidth: 793,
+                x: 0,
+                y: 0,
+                onclone: (clonedDocument) => {
+                    const clonedPageEl = clonedDocument.querySelector('.page') || clonedDocument;
+                    clonedPageEl.style.padding = '0';
+                    clonedPageEl.style.margin = '0';
 
-                                const clonedImages = clonedDocument.querySelectorAll('img');
-                                clonedImages.forEach(img => {
-                                    img.crossOrigin = 'anonymous';
-                                    img.loading = 'eager';
-                                    img.style.display = 'block';
-                                    img.style.visibility = 'visible';
-                                });
-                            }
-                        });
+                    const clonedImages = clonedDocument.querySelectorAll('img');
+                    clonedImages.forEach(img => {
+                        img.crossOrigin = 'anonymous';
+                        img.loading = 'eager';
+                        img.style.display = 'block';
+                        img.style.visibility = 'visible';
+                    });
+                }
+            });
 
-                        // Restore original padding
-                        pageEl.style.padding = originalPadding;
+            // Restore original padding
+            pageEl.style.padding = originalPadding;
 
-                        pageCanvases.push(pageCanvas);
-                        (`✅ .page ${i + 1} canvas conversion complete`);
+            pageCanvases.push(pageCanvas);
+            console.log(`✅ .page ${i + 1} canvas conversion complete`);
+        }
+
+        console.log(`✅ Page rendering complete - ${pageCanvases.length} .page elements rendered separately`);
+
+        // Extract images BEFORE removing container
+        // This prevents empty/blank image containers from appearing in the PDF
+        console.log('⏳ Extracting images and removing containers from HTML...');
+        const images = Array.from(container.querySelectorAll('img.pdf-image'));
+        const imageData = [];
+
+        console.log('🔍 Found total images with class="pdf-image":', images.length);
+
+        // Extract valid images and REMOVE ALL their containers
+        for (const img of images) {
+            const src = img.src || img.getAttribute('data-src');
+            const label = img.getAttribute('alt') || 'Image';
+
+            console.log(`🖼️ Image found - label: "${label}", hasSrc: ${!!src}, srcType: ${src ? (src.startsWith('data:') ? 'data-uri' : src.startsWith('blob:') ? 'blob' : src.startsWith('http') ? 'http' : 'other') : 'none'}`);
+
+            // Only extract images with valid src
+            if (src && (src.startsWith('data:') || src.startsWith('blob:') || src.startsWith('http'))) {
+                imageData.push({
+                    src,
+                    label,
+                    type: label.includes('Location') ? 'location' :
+                        label.includes('Supporting') ? 'supporting' : 'property'
+                });
+                console.log(`✅ Extracted image: ${label} (type: ${label.includes('Location') ? 'location' : label.includes('Supporting') ? 'supporting' : 'property'})`);
+            } else {
+                console.log(`⏭️ Invalid image src, will not add to PDF: ${label}`);
+            }
+
+            // CRITICAL FIX: REMOVE the ENTIRE image container from HTML
+            // (not just hiding the image) to prevent empty boxes from rendering in PDF
+            const parentContainer = img.closest('.image-container');
+            if (parentContainer) {
+                console.log(`🗑️ Removing image container from HTML: ${label}`);
+                parentContainer.remove();
+            }
+        }
+
+        console.log('✅ Extracted', imageData.length, 'images; removed', images.length, 'containers from HTML');
+
+        // Remove temporary container now that we've extracted images
+        document.body.removeChild(container);
+        console.log('✅ Container removed from DOM');
+
+        // Create PDF from main canvas with header/footer margins
+        // Use JPEG for better compression instead of PNG
+        const imgData = mainCanvas.toDataURL('image/jpeg', 0.85);
+        const imgWidth = 210;
+        const pageHeight = 297;
+        const headerHeight = 20;  // 10mm header space
+        const footerHeight = 20;  // 10mm footer space
+        const usableHeight = pageHeight - headerHeight - footerHeight;
+        const imgHeight = (mainCanvas.height * imgWidth) / mainCanvas.width;
+
+        // Function to find safe break point (avoid splitting rows)
+        const findSafeBreakPoint = (canvasHeight, startPixel, maxHeightPixels, isFirstPage = false, isLastPage = false) => {
+            try {
+                // Ensure we're within bounds
+                const safeStartPixel = Math.max(0, Math.floor(startPixel));
+                const safeHeight = Math.min(maxHeightPixels, canvasHeight - safeStartPixel);
+
+                if (safeHeight <= 0) {
+                    return maxHeightPixels;
+                }
+
+                // Get image data to detect row boundaries
+                const ctx = mainCanvas.getContext('2d');
+                const width = Math.floor(mainCanvas.width);
+                const height = Math.floor(safeHeight);
+
+                const imageData = ctx.getImageData(0, safeStartPixel, width, height);
+                const data = imageData.data;
+
+                // Look for horizontal lines (table borders) by scanning for rows of dark pixels
+                let lastBlackRowIndex = 0;
+                let borderThickness = 0;
+
+                const pixelsPerRow = width * 4; // RGBA = 4 bytes per pixel
+                const rowCount = height;
+                let inBorder = false;
+                const borderRows = [];
+
+                for (let row = 0; row < rowCount; row++) {
+                    let blackCount = 0;
+                    const rowStart = row * pixelsPerRow;
+
+                    // Count dark pixels in this row
+                    for (let col = 0; col < width; col++) {
+                        const idx = rowStart + col * 4;
+                        const r = data[idx];
+                        const g = data[idx + 1];
+                        const b = data[idx + 2];
+
+                        // Check if pixel is dark (table border)
+                        if (r < 150 && g < 150 && b < 150) {
+                            blackCount++;
+                        }
                     }
 
-                    (`✅ Page rendering complete - ${pageCanvases.length} .page elements rendered separately`);
-
-                    // Extract images BEFORE removing container
-                    // This prevents empty/blank image containers from appearing in the PDF
-                    ('⏳ Extracting images and removing containers from HTML...');
-                    const images = Array.from(container.querySelectorAll('img.pdf-image'));
-                    const imageData = [];
-
-                    // Extract valid images and REMOVE ALL their containers
-                    for (const img of images) {
-                        const src = img.src || img.getAttribute('data-src');
-                        const label = img.getAttribute('alt') || 'Image';
-
-                        // Only extract images with valid src
-                        if (src && (src.startsWith('data:') || src.startsWith('blob:') || src.startsWith('http'))) {
-                            imageData.push({
-                                src,
-                                label,
-                                type: label.includes('Location') ? 'location' :
-                                    label.includes('Supporting') ? 'supporting' : 'property'
-                            });
-                            (`📸 Extracted image: ${label}`);
+                    // If >80% of row is dark, it's a border line (increased threshold to be less aggressive)
+                    if (blackCount > width * 0.6) {
+                        if (!inBorder) {
+                            inBorder = true;
+                            borderThickness = 1;
+                            borderRows.push(row);
                         } else {
-                            (`⏭️ Invalid image src, will not add to PDF: ${label}`);
+                            borderThickness++;
                         }
-
-                        // CRITICAL FIX: REMOVE the ENTIRE image container from HTML
-                        // (not just hiding the image) to prevent empty boxes from rendering in PDF
-                        const parentContainer = img.closest('.image-container');
-                        if (parentContainer) {
-                            (`🗑️ Removing image container from HTML: ${label}`);
-                            parentContainer.remove();
-                        }
-                    }
-
-                    ('✅ Extracted', imageData.length, 'images; removed', images.length, 'containers from HTML');
-
-                    // Remove temporary container now that we've extracted images
-                    document.body.removeChild(container);
-                    ('✅ Container removed from DOM');
-
-                    // Create PDF from main canvas with header/footer margins
-                    // Use JPEG for better compression instead of PNG
-                    const imgData = mainCanvas.toDataURL('image/jpeg', 0.85);
-                    const imgWidth = 210;
-                    const pageHeight = 297;
-                    const headerHeight = 20;  // 10mm header space
-                    const footerHeight = 20;  // 10mm footer space
-                    const usableHeight = pageHeight - headerHeight - footerHeight;
-                    const imgHeight = (mainCanvas.height * imgWidth) / mainCanvas.width;
-
-                    // Function to find safe break point (avoid splitting rows)
-                    const findSafeBreakPoint = (canvasHeight, startPixel, maxHeightPixels, isFirstPage = false, isLastPage = false) => {
-                        try {
-                            // Ensure we're within bounds
-                            const safeStartPixel = Math.max(0, Math.floor(startPixel));
-                            const safeHeight = Math.min(maxHeightPixels, canvasHeight - safeStartPixel);
-
-                            if (safeHeight <= 0) {
-                                return maxHeightPixels;
-                            }
-
-                            // Get image data to detect row boundaries
-                            const ctx = mainCanvas.getContext('2d');
-                            const width = Math.floor(mainCanvas.width);
-                            const height = Math.floor(safeHeight);
-
-                            const imageData = ctx.getImageData(0, safeStartPixel, width, height);
-                            const data = imageData.data;
-
-                            // Look for horizontal lines (table borders) by scanning for rows of dark pixels
-                            let lastBlackRowIndex = 0;
-                            let borderThickness = 0;
-
-                            const pixelsPerRow = width * 4; // RGBA = 4 bytes per pixel
-                            const rowCount = height;
-                            let inBorder = false;
-                            const borderRows = [];
-
-                            for (let row = 0; row < rowCount; row++) {
-                                let blackCount = 0;
-                                const rowStart = row * pixelsPerRow;
-
-                                // Count dark pixels in this row
-                                for (let col = 0; col < width; col++) {
-                                    const idx = rowStart + col * 4;
-                                    const r = data[idx];
-                                    const g = data[idx + 1];
-                                    const b = data[idx + 2];
-
-                                    // Check if pixel is dark (table border)
-                                    if (r < 150 && g < 150 && b < 150) {
-                                        blackCount++;
-                                    }
-                                }
-
-                                // If >80% of row is dark, it's a border line (increased threshold to be less aggressive)
-                                if (blackCount > width * 0.6) {
-                                    if (!inBorder) {
-                                        inBorder = true;
-                                        borderThickness = 1;
-                                        borderRows.push(row);
-                                    } else {
-                                        borderThickness++;
-                                    }
-                                    lastBlackRowIndex = row;
-                                } else {
-                                    inBorder = false;
-                                }
-                            }
-
-
-
-                            // Return the last safe break point (after the border)
-                            if (lastBlackRowIndex > 0 && lastBlackRowIndex < rowCount - 5) {
-                                return lastBlackRowIndex;
-                            }
-                        } catch (err) {
-                            console.warn('Error finding safe break point:', err?.message);
-                        }
-
-                        // Fallback to original height if detection fails
-                        return maxHeightPixels;
-                    };
-
-                    const pdf = new jsPDF('p', 'mm', 'A4');
-                    let pageNumber = 1;
-                    let heightLeft = imgHeight;
-                    let yPosition = 0;
-                    let sourceY = 0;  // Track position in the source canvas
-                    let currentPageYPosition = headerHeight;  // Track current Y position on page
-
-                    while (heightLeft > 0) {
-
-                        // Calculate how much of the image fits on this page
-                        let imageHeightForThisPage = Math.min(usableHeight, heightLeft);
-
-                        // Calculate the crop region from the canvas
-                        const canvasHeight = mainCanvas.height;
-                        const canvasWidth = mainCanvas.width;
-                        const sourceYPixels = (sourceY / imgHeight) * canvasHeight;
-                        const maxHeightPixels = (imageHeightForThisPage / imgHeight) * canvasHeight;
-
-                        // Check if this is first or last page
-                        const isFirstPage = pageNumber === 1;
-                        const isLastPage = heightLeft - imageHeightForThisPage <= 0;
-
-                        // Apply bold borders BEFORE finding safe break point
-                        const ctx = mainCanvas.getContext('2d');
-                        const width = Math.floor(mainCanvas.width);
-                        const height = Math.floor(maxHeightPixels);
-
-                        // Guard against getImageData with 0 height
-                        if (height <= 0) {
-                            console.warn('⚠️ Height is 0 or negative, skipping image data operations');
-                            heightLeft -= imageHeightForThisPage;
-                            sourceY += imageHeightForThisPage;
-                            pageNumber++;
-                            if (heightLeft > 0) {
-                                pdf.addPage();
-                            }
-                            continue;
-                        }
-
-                        const imageData = ctx.getImageData(0, Math.floor(sourceYPixels), width, height);
-                        const data = imageData.data;
-                        const pixelsPerRow = width * 4;
-
-                        // Calculate table boundaries (table is approximately in center, ~645px wide at 1.5x scale = ~430px at normal view)
-                        // But we need to find it dynamically from the actual border pixels
-                        let tableLeftBound = 0;
-                        let tableRightBound = width;
-
-                        // Find table left boundary by looking for first vertical line of dark pixels
-                        for (let col = 0; col < Math.min(200, width); col++) {
-                            let darkCount = 0;
-                            for (let row = 10; row < Math.min(50, height); row++) {
-                                const idx = (row * pixelsPerRow) + (col * 4);
-                                if (data[idx] < 150 && data[idx + 1] < 150 && data[idx + 2] < 150) {
-                                    darkCount++;
-                                }
-                            }
-                            if (darkCount > 10) {
-                                tableLeftBound = col;
-                                break;
-                            }
-                        }
-
-                        // Find table right boundary by looking for last vertical line of dark pixels
-                        for (let col = width - 1; col > tableLeftBound + 100; col--) {
-                            let darkCount = 0;
-                            for (let row = 10; row < Math.min(50, height); row++) {
-                                const idx = (row * pixelsPerRow) + (col * 4);
-                                if (data[idx] < 150 && data[idx + 1] < 150 && data[idx + 2] < 150) {
-                                    darkCount++;
-                                }
-                            }
-                            if (darkCount > 10) {
-                                tableRightBound = col;
-                                break;
-                            }
-                        }
-
-                        // Find top border (first border row in this section)
-                        if (!isFirstPage) {
-                            for (let row = 0; row < Math.min(50, height); row++) {
-                                let blackCount = 0;
-                                const rowStart = row * pixelsPerRow;
-                                // Only count dark pixels within table bounds
-                                for (let col = tableLeftBound; col < tableRightBound; col++) {
-                                    const idx = rowStart + col * 4;
-                                    if (data[idx] < 150 && data[idx + 1] < 150 && data[idx + 2] < 150) {
-                                        blackCount++;
-                                    }
-                                }
-                                const tableWidth = tableRightBound - tableLeftBound;
-                                if (blackCount > tableWidth * 0.6) {
-                                    // Make top border bold - only within table bounds
-                                    for (let offset = -2; offset <= 2; offset++) {
-                                        const boldRow = row + offset;
-                                        if (boldRow >= 0 && boldRow < height) {
-                                            const boldRowStart = boldRow * pixelsPerRow;
-                                            // Only darken pixels within table bounds
-                                            for (let col = tableLeftBound; col < tableRightBound; col++) {
-                                                const idx = boldRowStart + col * 4;
-                                                data[idx] = 0;      // R
-                                                data[idx + 1] = 0;  // G
-                                                data[idx + 2] = 0;  // B
-                                                data[idx + 3] = 255; // A
-                                            }
-                                        }
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-
-                        // Find bottom border (last border row in this section)
-                        if (!isLastPage) {
-                            for (let row = height - 1; row >= Math.max(0, height - 50); row--) {
-                                let blackCount = 0;
-                                const rowStart = row * pixelsPerRow;
-                                // Only count dark pixels within table bounds
-                                for (let col = tableLeftBound; col < tableRightBound; col++) {
-                                    const idx = rowStart + col * 4;
-                                    if (data[idx] < 150 && data[idx + 1] < 150 && data[idx + 2] < 150) {
-                                        blackCount++;
-                                    }
-                                }
-                                const tableWidth = tableRightBound - tableLeftBound;
-                                if (blackCount > tableWidth * 0.6) {
-                                    // Make bottom border bold - only within table bounds
-                                    for (let offset = -2; offset <= 2; offset++) {
-                                        const boldRow = row + offset;
-                                        if (boldRow >= 0 && boldRow < height) {
-                                            const boldRowStart = boldRow * pixelsPerRow;
-                                            // Only darken pixels within table bounds
-                                            for (let col = tableLeftBound; col < tableRightBound; col++) {
-                                                const idx = boldRowStart + col * 4;
-                                                data[idx] = 0;      // R
-                                                data[idx + 1] = 0;  // G
-                                                data[idx + 2] = 0;  // B
-                                                data[idx + 3] = 255; // A
-                                            }
-                                        }
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-
-                        ctx.putImageData(imageData, 0, Math.floor(sourceYPixels));
-
-                        // Find safe break point to keep table rows intact
-                        let sourceHeightPixels = maxHeightPixels;
-
-                        // Only check for incomplete rows if not on last page
-                        if (!isLastPage && heightLeft > imageHeightForThisPage) {
-                            try {
-                                // Scan bottom 200px to detect if we're cutting a table row
-                                const bottomScanHeight = Math.min(200, height);
-                                let lastCompleteRowBottom = 0;
-                                let foundIncompleteRow = false;
-
-                                // Look for the last complete horizontal border line in the bottom section
-                                for (let row = height - 1; row >= Math.max(0, height - bottomScanHeight); row--) {
-                                    let darkPixelCount = 0;
-                                    const rowStart = row * pixelsPerRow;
-
-                                    // Count dark pixels across table width
-                                    for (let col = tableLeftBound; col < tableRightBound; col++) {
-                                        const idx = rowStart + col * 4;
-                                        if (data[idx] < 150 && data[idx + 1] < 150 && data[idx + 2] < 150) {
-                                            darkPixelCount++;
-                                        }
-                                    }
-
-                                    const tableWidth = tableRightBound - tableLeftBound;
-                                    const isTableBorder = darkPixelCount > tableWidth * 0.7;
-
-                                    // If we find a complete border line, this is a good break point
-                                    if (isTableBorder && lastCompleteRowBottom === 0) {
-                                        lastCompleteRowBottom = row;
-                                        foundIncompleteRow = true;
-                                    }
-                                }
-
-                                // If we found an incomplete row at bottom, cut before it
-                                if (foundIncompleteRow && lastCompleteRowBottom > 50) {
-                                    sourceHeightPixels = Math.floor(lastCompleteRowBottom);
-                                    (`✅ Detected incomplete row - cutting at ${sourceHeightPixels}px to push row to next page`);
-                                }
-                            } catch (err) {
-                                console.warn('⚠️ Error detecting incomplete rows:', err?.message);
-                            }
-                        }
-
-                        // Recalculate the actual height used
-                        imageHeightForThisPage = (sourceHeightPixels / canvasHeight) * imgHeight;
-
-                        // Create a cropped canvas for this page
-                        const croppedPageCanvas = document.createElement('canvas');
-                        croppedPageCanvas.width = canvasWidth;
-                        croppedPageCanvas.height = sourceHeightPixels;
-                        const pageCtx = croppedPageCanvas.getContext('2d');
-                        pageCtx.drawImage(
-                            mainCanvas,
-                            0, sourceYPixels,
-                            canvasWidth, sourceHeightPixels,
-                            0, 0,
-                            canvasWidth, sourceHeightPixels
-                        );
-
-                        const pageImgData = croppedPageCanvas.toDataURL('image/jpeg', 0.85);
-
-                        // Add image with top margin (header space)
-                        pdf.addImage(pageImgData, 'JPEG', 0, headerHeight, imgWidth, imageHeightForThisPage);
-
-                        // Add page number in footer
-                        pdf.setFontSize(9);
-                        pdf.text(`Page ${pageNumber}`, 105, pageHeight - 5, { align: 'center' });
-
-                        // Update counters
-                        heightLeft -= imageHeightForThisPage;
-                        sourceY += imageHeightForThisPage;
-                        currentPageYPosition += imageHeightForThisPage;
-                        pageNumber++;
-
-                        if (heightLeft > 0) {
-                            pdf.addPage();
-                            currentPageYPosition = headerHeight;
-                        }
-                    }
-
-                    // Reset position if main content ends - prevents empty page before next section
-                    if (heightLeft <= 0) {
-                        currentPageYPosition = headerHeight;
-                    }
-
-                    // Helper function to process annexure sections
-                    const processAnnexureSection = async (annexureHtmlContent, annexureName, needsNewPage = true) => {
-                        if (!annexureHtmlContent) return;
-
-                        (`📄 Processing ${annexureName} section...`);
-
-                        // Create container for annexure
-                        const annexureContainer = document.createElement('div');
-                        annexureContainer.innerHTML = annexureHtmlContent;
-                        annexureContainer.style.position = 'absolute';
-                        annexureContainer.style.left = '-9999px';
-                        annexureContainer.style.top = '-9999px';
-                        annexureContainer.style.width = '210mm';
-                        annexureContainer.style.height = 'auto';
-                        annexureContainer.style.backgroundColor = '#ffffff';
-                        annexureContainer.style.fontSize = '12pt';
-                        annexureContainer.style.fontFamily = "'Arial', sans-serif";
-                        document.body.appendChild(annexureContainer);
-
-                        // Convert annexure to canvas
-                        const annexureCanvas = await html2canvas(annexureContainer, {
-                            scale: 1.5,
-                            useCORS: true,
-                            logging: false,
-                            backgroundColor: '#ffffff',
-                            allowTaint: true,
-                            imageTimeout: 10000,
-                            windowHeight: annexureContainer.scrollHeight,
-                            windowWidth: 793
-                        });
-
-                        // Calculate dimensions for annexure
-                        const annexureImgHeight = (annexureCanvas.height * imgWidth) / annexureCanvas.width;
-
-                        // Add new page for annexure only if needed AND there's not enough space remaining
-                        const remainingHeightOnPage = pageHeight - footerHeight - currentPageYPosition;
-
-                        if (needsNewPage && annexureImgHeight > remainingHeightOnPage && currentPageYPosition > headerHeight + 50) {
-                            // Only add new page if section won't fit AND there's substantial content already on page
-                            pdf.addPage();
-                            pageNumber++;
-                            currentPageYPosition = headerHeight;
-                            (`📄 Added new page for ${annexureName} (insufficient space)`);
-                        } else if (needsNewPage && currentPageYPosition <= headerHeight + 50) {
-                            (`📄 Skipping new page for ${annexureName} - minimal content on current page, continuing`);
-                        }
-                        let annexureHeightLeft = annexureImgHeight;
-                        let annexureSourceY = 0;
-                        let annexurePageStarted = !needsNewPage;
-
-                        // Paginate annexure content
-                        while (annexureHeightLeft > 0) {
-                            // Check if content fits on current page
-                            let remainingHeightOnPage = pageHeight - footerHeight - currentPageYPosition;
-
-                            if (annexureHeightLeft > remainingHeightOnPage) {
-                                // Content doesn't fit, need new page
-                                pdf.addPage();
-                                pageNumber++;
-                                currentPageYPosition = headerHeight;
-                                remainingHeightOnPage = pageHeight - footerHeight - currentPageYPosition;
-                            }
-
-                            let imageHeightForAnnexurePage = Math.min(remainingHeightOnPage, annexureHeightLeft);
-                            const annexureCanvasHeight = annexureCanvas.height;
-                            const annexureCanvasWidth = annexureCanvas.width;
-                            const annexureSourceYPixels = (annexureSourceY / annexureImgHeight) * annexureCanvasHeight;
-                            const annexureMaxHeightPixels = (imageHeightForAnnexurePage / annexureImgHeight) * annexureCanvasHeight;
-
-                            const annexureSafeHeightPixels = findSafeBreakPoint(annexureCanvasHeight, annexureSourceYPixels, annexureMaxHeightPixels);
-                            const annexureSourceHeightPixels = Math.min(annexureSafeHeightPixels, annexureMaxHeightPixels);
-
-                            imageHeightForAnnexurePage = (annexureSourceHeightPixels / annexureCanvasHeight) * annexureImgHeight;
-
-                            // Create cropped canvas for annexure page
-                            const annexurePageCanvas = document.createElement('canvas');
-                            annexurePageCanvas.width = annexureCanvasWidth;
-                            annexurePageCanvas.height = annexureSourceHeightPixels;
-                            const annexurePageCtx = annexurePageCanvas.getContext('2d');
-                            annexurePageCtx.drawImage(
-                                annexureCanvas,
-                                0, annexureSourceYPixels,
-                                annexureCanvasWidth, annexureSourceHeightPixels,
-                                0, 0,
-                                annexureCanvasWidth, annexureSourceHeightPixels
-                            );
-
-                            const annexurePageImgData = annexurePageCanvas.toDataURL('image/jpeg', 0.85);
-                            pdf.addImage(annexurePageImgData, 'JPEG', 0, currentPageYPosition, imgWidth, imageHeightForAnnexurePage);
-
-                            // Add page number
-                            pdf.setFontSize(9);
-                            pdf.text(`Page ${pageNumber}`, 105, pageHeight - 5, { align: 'center' });
-
-                            annexureHeightLeft -= imageHeightForAnnexurePage;
-                            annexureSourceY += imageHeightForAnnexurePage;
-                            currentPageYPosition += imageHeightForAnnexurePage;
-                        }
-
-                        // Clean up container
-                        document.body.removeChild(annexureContainer);
-                        (`✅ ${annexureName} section added to PDF`);
-                    };
-
-                    // Process Cost of Construction section (always starts on new page)
-                    if (costOfConstructionHtmlContent) {
-                        await processAnnexureSection(costOfConstructionHtmlContent, 'Cost of Construction', true);
-                    }
-
-                    // Process Annexure-II section (no new page if already on new page)
-                    if (annexure2HtmlContent) {
-                        await processAnnexureSection(annexure2HtmlContent, 'Annexure-II', false);
-                    }
-
-                    // Process Annexure-III section (no new page - continue from previous)
-                    if (annexure3HtmlContent) {
-                        await processAnnexureSection(annexure3HtmlContent, 'Annexure-III', false);
-                    }
-
-                    // Process Property Images section (always starts on new page)
-                    if (propertyImagesHtmlContent) {
-                        currentPageYPosition = headerHeight;
-                        await processAnnexureSection(propertyImagesHtmlContent, 'Property Images', true);
-                    }
-
-                    // Process Area Images on new page
-                    if (areaImagesHtmlContent) {
-                        currentPageYPosition = headerHeight;
-                        await processAnnexureSection(areaImagesHtmlContent, 'Area Images', true);
-                    }
-
-                    // Process Location Images on new page
-                    if (locationImagesHtmlContent) {
-                        await processAnnexureSection(locationImagesHtmlContent, 'Location Images', true);
-                    }
-
-                    // Process Supporting Documents on new page
-                    if (supportingDocsHtmlContent) {
-                        await processAnnexureSection(supportingDocsHtmlContent, 'Supporting Documents', true);
-                    }
-
-                    ('📸 All image sections processed and added to PDF');
-
-                    // Add page canvases as separate pages in PDF
-                    (`📄 Adding ${pageCanvases.length} separate .page canvases to PDF...`);
-                    for (let i = 0; i < pageCanvases.length; i++) {
-                        const pageCanvas = pageCanvases[i];
-                        const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.85);
-                        const pageImgHeight = (pageCanvas.height * imgWidth) / pageCanvas.width;
-
-                        pdf.addPage();
-                        // Add image with proper margins (12mm = ~45px at 96dpi)
-                        const leftMargin = 12;
-                        const topMargin = 12;
-                        const availableWidth = imgWidth - (leftMargin * 2);
-                        const adjustedImgHeight = (pageCanvas.height * availableWidth) / pageCanvas.width;
-
-                        pdf.addImage(pageImgData, 'JPEG', leftMargin, topMargin, availableWidth, adjustedImgHeight);
-                        pdf.setFontSize(9);
-                        pdf.text(`Page ${pageNumber}`, 105, pageHeight - 5, { align: 'center' });
-                        pageNumber++;
-                        (`✅ Added .page canvas ${i + 1} as page ${pageNumber - 1}`);
-                    }
-
-                    // Add images as separate pages
-                    ('📸 Adding', imageData.length, 'images to PDF...');
-
-                    // Filter out images with invalid src before adding to PDF
-                    const validImages = imageData.filter(img => {
-                        if (!img.src || typeof img.src !== 'string' || !img.src.trim()) {
-                            (`⏭️ Skipping image with invalid src: ${img.label}`);
-                            return false;
-                        }
-                        return true;
-                    });
-
-                    if (validImages.length > 0) {
-                        // Separate images by type
-                        const propertyImgs = validImages.filter(img => img.type === 'property');
-                        const locationImgs = validImages.filter(img => img.type === 'location');
-                        const supportingImgs = validImages.filter(img => img.type === 'supporting');
-
-                        // ===== ADD PROPERTY IMAGES: 6 per page (2 columns x 3 rows) =====
-                        if (propertyImgs.length > 0) {
-                            pdf.addPage();
-                            let imgIndex = 0;
-
-                            while (imgIndex < propertyImgs.length) {
-                                const startIdx = imgIndex;
-                                let row = 0;
-
-                                // Add up to 6 images (2 columns x 3 rows) per page
-                                for (row = 0; row < 3 && imgIndex < propertyImgs.length; row++) {
-                                    const yPos = 15 + row * 92; // 3 rows with spacing
-
-                                    // Left column
-                                    if (imgIndex < propertyImgs.length) {
-                                        const img = propertyImgs[imgIndex];
-                                        try {
-                                            if (img.src.startsWith('data:') || img.src.startsWith('blob:') || img.src.startsWith('http://') || img.src.startsWith('https://')) {
-                                                pdf.setFontSize(8);
-                                                pdf.setFont(undefined, 'bold');
-                                                pdf.text(img.label, 12, yPos);
-                                                pdf.addImage(img.src, 'JPEG', 12, yPos + 4, 92, 82);
-                                                (`✅ Added property image (L): ${img.label}`);
-                                            }
-                                        } catch (err) {
-                                            console.warn(`Failed to add property image ${img.label}:`, err?.message);
-                                        }
-                                        imgIndex++;
-                                    }
-
-                                    // Right column
-                                    if (imgIndex < propertyImgs.length) {
-                                        const img = propertyImgs[imgIndex];
-                                        try {
-                                            if (img.src.startsWith('data:') || img.src.startsWith('blob:') || img.src.startsWith('http://') || img.src.startsWith('https://')) {
-                                                pdf.setFontSize(8);
-                                                pdf.setFont(undefined, 'bold');
-                                                pdf.text(img.label, 108, yPos);
-                                                pdf.addImage(img.src, 'JPEG', 108, yPos + 4, 92, 82);
-                                                (`✅ Added property image (R): ${img.label}`);
-                                            }
-                                        } catch (err) {
-                                            console.warn(`Failed to add property image ${img.label}:`, err?.message);
-                                        }
-                                        imgIndex++;
-                                    }
-                                }
-
-                                // Add new page if more images remain
-                                if (imgIndex < propertyImgs.length) {
-                                    pdf.addPage();
-                                }
-                            }
-                        }
-
-                        // ===== ADD LOCATION IMAGES: 1 per page =====
-                        if (locationImgs.length > 0) {
-                            for (let i = 0; i < locationImgs.length; i++) {
-                                const img = locationImgs[i];
-
-                                try {
-                                    if (!img.src.startsWith('data:') && !img.src.startsWith('blob:') && !img.src.startsWith('http://') && !img.src.startsWith('https://')) {
-                                        continue;
-                                    }
-
-                                    pdf.addPage();
-
-                                    // Add image title
-                                    pdf.setFontSize(11);
-                                    pdf.setFont(undefined, 'bold');
-                                    pdf.text(img.label, 15, 15);
-
-                                    // Add image - 1 per page, larger size
-                                    const imgWidth = 180;
-                                    const imgHeight = 220;
-                                    pdf.addImage(img.src, 'JPEG', 15, 25, imgWidth, imgHeight);
-
-                                    (`✅ Added location image: ${img.label}`);
-                                } catch (err) {
-                                    console.warn(`Failed to add location image ${img.label}:`, err?.message);
-                                }
-                            }
-                        }
-
-                        // ===== ADD SUPPORTING DOCUMENTS: 1 per page =====
-                        if (supportingImgs.length > 0) {
-                            for (let i = 0; i < supportingImgs.length; i++) {
-                                const img = supportingImgs[i];
-
-                                try {
-                                    if (!img.src.startsWith('data:') && !img.src.startsWith('blob:') && !img.src.startsWith('http://') && !img.src.startsWith('https://')) {
-                                        continue;
-                                    }
-
-                                    pdf.addPage();
-
-                                    // Add image title
-                                    pdf.setFontSize(11);
-                                    pdf.setFont(undefined, 'bold');
-                                    pdf.text(img.label, 15, 15);
-
-                                    // Add image - 1 per page, larger size
-                                    const imgWidth = 180;
-                                    const imgHeight = 220;
-                                    pdf.addImage(img.src, 'JPEG', 15, 25, imgWidth, imgHeight);
-
-                                    (`✅ Added supporting document: ${img.label}`);
-                                } catch (err) {
-                                    console.warn(`Failed to add supporting document ${img.label}:`, err?.message);
-                                }
-                            }
-                        }
+                        lastBlackRowIndex = row;
                     } else {
-                        ('⏭️ No valid images to add to PDF');
+                        inBorder = false;
                     }
+                }
 
-                    // Add PDF metadata including generation time
-                    const now = new Date();
-                    const generationTime = now.toLocaleString();
-                    pdf.setProperties({
-                        title: `Valuation Report - ${record?.clientName || record?.uniqueId || 'Report'}`,
-                        subject: 'Property Valuation Report',
-                        author: 'UBI APF Valuation System',
-                        keywords: 'Valuation, Property, UBI APF',
-                        creator: 'UBI APF PDF Generator'
-                    });
 
-                    // Download PDF
-                    const filename = `valuation_${record?.clientName || record?.uniqueId || Date.now()}.pdf`;
-                    pdf.save(filename);
 
-                    (`✅ PDF generated at: ${generationTime}`);
+                // Return the last safe break point (after the border)
+                if (lastBlackRowIndex > 0 && lastBlackRowIndex < rowCount - 5) {
+                    return lastBlackRowIndex;
+                }
+            } catch (err) {
+                console.warn('Error finding safe break point:', err?.message);
+            }
 
-                    ('✅ PDF generated and downloaded:', filename);
-                    return filename;
-                } catch (error) {
-                    console.error('❌ Client-side PDF generation error:', error);
-                    throw error;
+            // Fallback to original height if detection fails
+            return maxHeightPixels;
+        };
+
+        const pdf = new jsPDF('p', 'mm', 'A4');
+        let pageNumber = 1;
+        let heightLeft = imgHeight;
+        let yPosition = 0;
+        let sourceY = 0;  // Track position in the source canvas
+        let currentPageYPosition = headerHeight;  // Track current Y position on page
+
+        while (heightLeft > 0) {
+
+            // Calculate how much of the image fits on this page
+            let imageHeightForThisPage = Math.min(usableHeight, heightLeft);
+
+            // Calculate the crop region from the canvas
+            const canvasHeight = mainCanvas.height;
+            const canvasWidth = mainCanvas.width;
+            const sourceYPixels = (sourceY / imgHeight) * canvasHeight;
+            const maxHeightPixels = (imageHeightForThisPage / imgHeight) * canvasHeight;
+
+            // Check if this is first or last page
+            const isFirstPage = pageNumber === 1;
+            const isLastPage = heightLeft - imageHeightForThisPage <= 0;
+
+            // Apply bold borders BEFORE finding safe break point
+            const ctx = mainCanvas.getContext('2d');
+            const width = Math.floor(mainCanvas.width);
+            const height = Math.floor(maxHeightPixels);
+
+            // Guard against getImageData with 0 height
+            if (height <= 0) {
+                console.warn('⚠️ Height is 0 or negative, skipping image data operations');
+                heightLeft -= imageHeightForThisPage;
+                sourceY += imageHeightForThisPage;
+                pageNumber++;
+                if (heightLeft > 0) {
+                    pdf.addPage();
+                }
+                continue;
+            }
+
+            const imageData = ctx.getImageData(0, Math.floor(sourceYPixels), width, height);
+            const data = imageData.data;
+            const pixelsPerRow = width * 4;
+
+            // Calculate table boundaries (table is approximately in center, ~645px wide at 1.5x scale = ~430px at normal view)
+            // But we need to find it dynamically from the actual border pixels
+            let tableLeftBound = 0;
+            let tableRightBound = width;
+
+            // Find table left boundary by looking for first vertical line of dark pixels
+            for (let col = 0; col < Math.min(200, width); col++) {
+                let darkCount = 0;
+                for (let row = 10; row < Math.min(50, height); row++) {
+                    const idx = (row * pixelsPerRow) + (col * 4);
+                    if (data[idx] < 150 && data[idx + 1] < 150 && data[idx + 2] < 150) {
+                        darkCount++;
+                    }
+                }
+                if (darkCount > 10) {
+                    tableLeftBound = col;
+                    break;
                 }
             }
+
+            // Find table right boundary by looking for last vertical line of dark pixels
+            for (let col = width - 1; col > tableLeftBound + 100; col--) {
+                let darkCount = 0;
+                for (let row = 10; row < Math.min(50, height); row++) {
+                    const idx = (row * pixelsPerRow) + (col * 4);
+                    if (data[idx] < 150 && data[idx + 1] < 150 && data[idx + 2] < 150) {
+                        darkCount++;
+                    }
+                }
+                if (darkCount > 10) {
+                    tableRightBound = col;
+                    break;
+                }
+            }
+
+            // Find top border (first border row in this section)
+            if (!isFirstPage) {
+                for (let row = 0; row < Math.min(50, height); row++) {
+                    let blackCount = 0;
+                    const rowStart = row * pixelsPerRow;
+                    // Only count dark pixels within table bounds
+                    for (let col = tableLeftBound; col < tableRightBound; col++) {
+                        const idx = rowStart + col * 4;
+                        if (data[idx] < 150 && data[idx + 1] < 150 && data[idx + 2] < 150) {
+                            blackCount++;
+                        }
+                    }
+                    const tableWidth = tableRightBound - tableLeftBound;
+                    if (blackCount > tableWidth * 0.6) {
+                        // Make top border bold - only within table bounds
+                        for (let offset = -2; offset <= 2; offset++) {
+                            const boldRow = row + offset;
+                            if (boldRow >= 0 && boldRow < height) {
+                                const boldRowStart = boldRow * pixelsPerRow;
+                                // Only darken pixels within table bounds
+                                for (let col = tableLeftBound; col < tableRightBound; col++) {
+                                    const idx = boldRowStart + col * 4;
+                                    data[idx] = 0;      // R
+                                    data[idx + 1] = 0;  // G
+                                    data[idx + 2] = 0;  // B
+                                    data[idx + 3] = 255; // A
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
+            // Find bottom border (last border row in this section)
+            if (!isLastPage) {
+                for (let row = height - 1; row >= Math.max(0, height - 50); row--) {
+                    let blackCount = 0;
+                    const rowStart = row * pixelsPerRow;
+                    // Only count dark pixels within table bounds
+                    for (let col = tableLeftBound; col < tableRightBound; col++) {
+                        const idx = rowStart + col * 4;
+                        if (data[idx] < 150 && data[idx + 1] < 150 && data[idx + 2] < 150) {
+                            blackCount++;
+                        }
+                    }
+                    const tableWidth = tableRightBound - tableLeftBound;
+                    if (blackCount > tableWidth * 0.6) {
+                        // Make bottom border bold - only within table bounds
+                        for (let offset = -2; offset <= 2; offset++) {
+                            const boldRow = row + offset;
+                            if (boldRow >= 0 && boldRow < height) {
+                                const boldRowStart = boldRow * pixelsPerRow;
+                                // Only darken pixels within table bounds
+                                for (let col = tableLeftBound; col < tableRightBound; col++) {
+                                    const idx = boldRowStart + col * 4;
+                                    data[idx] = 0;      // R
+                                    data[idx + 1] = 0;  // G
+                                    data[idx + 2] = 0;  // B
+                                    data[idx + 3] = 255; // A
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
+            ctx.putImageData(imageData, 0, Math.floor(sourceYPixels));
+
+            // Find safe break point to keep table rows intact
+            let sourceHeightPixels = maxHeightPixels;
+
+            // Only check for incomplete rows if not on last page
+            if (!isLastPage && heightLeft > imageHeightForThisPage) {
+                try {
+                    // Scan bottom 200px to detect if we're cutting a table row
+                    const bottomScanHeight = Math.min(200, height);
+                    let lastCompleteRowBottom = 0;
+                    let foundIncompleteRow = false;
+
+                    // Look for the last complete horizontal border line in the bottom section
+                    for (let row = height - 1; row >= Math.max(0, height - bottomScanHeight); row--) {
+                        let darkPixelCount = 0;
+                        const rowStart = row * pixelsPerRow;
+
+                        // Count dark pixels across table width
+                        for (let col = tableLeftBound; col < tableRightBound; col++) {
+                            const idx = rowStart + col * 4;
+                            if (data[idx] < 150 && data[idx + 1] < 150 && data[idx + 2] < 150) {
+                                darkPixelCount++;
+                            }
+                        }
+
+                        const tableWidth = tableRightBound - tableLeftBound;
+                        const isTableBorder = darkPixelCount > tableWidth * 0.7;
+
+                        // If we find a complete border line, this is a good break point
+                        if (isTableBorder && lastCompleteRowBottom === 0) {
+                            lastCompleteRowBottom = row;
+                            foundIncompleteRow = true;
+                        }
+                    }
+
+                    // If we found an incomplete row at bottom, cut before it
+                    if (foundIncompleteRow && lastCompleteRowBottom > 50) {
+                        sourceHeightPixels = Math.floor(lastCompleteRowBottom);
+                        console.log(`✅ Detected incomplete row - cutting at ${sourceHeightPixels}px to push row to next page`);
+                    }
+                } catch (err) {
+                    console.warn('⚠️ Error detecting incomplete rows:', err?.message);
+                }
+            }
+
+            // Recalculate the actual height used
+            imageHeightForThisPage = (sourceHeightPixels / canvasHeight) * imgHeight;
+
+            // Create a cropped canvas for this page
+            const croppedPageCanvas = document.createElement('canvas');
+            croppedPageCanvas.width = canvasWidth;
+            croppedPageCanvas.height = sourceHeightPixels;
+            const pageCtx = croppedPageCanvas.getContext('2d');
+            pageCtx.drawImage(
+                mainCanvas,
+                0, sourceYPixels,
+                canvasWidth, sourceHeightPixels,
+                0, 0,
+                canvasWidth, sourceHeightPixels
+            );
+
+            const pageImgData = croppedPageCanvas.toDataURL('image/jpeg', 0.85);
+
+            // Add image with top margin (header space)
+            pdf.addImage(pageImgData, 'JPEG', 0, headerHeight, imgWidth, imageHeightForThisPage);
+
+            // Add page number in footer
+            pdf.setFontSize(9);
+            pdf.text(`Page ${pageNumber}`, 105, pageHeight - 5, { align: 'center' });
+
+            // Update counters
+            heightLeft -= imageHeightForThisPage;
+            sourceY += imageHeightForThisPage;
+            currentPageYPosition += imageHeightForThisPage;
+            pageNumber++;
+
+            if (heightLeft > 0) {
+                pdf.addPage();
+                currentPageYPosition = headerHeight;
+            }
+        }
+
+        // Reset position if main content ends - prevents empty page before next section
+        if (heightLeft <= 0) {
+            currentPageYPosition = headerHeight;
+        }
+
+        // Helper function to process annexure sections
+        const processAnnexureSection = async (annexureHtmlContent, annexureName, needsNewPage = true) => {
+            if (!annexureHtmlContent) return;
+
+            console.log(`📄 Processing ${annexureName} section...`);
+
+            // Create container for annexure
+            const annexureContainer = document.createElement('div');
+            annexureContainer.innerHTML = annexureHtmlContent;
+            annexureContainer.style.position = 'absolute';
+            annexureContainer.style.left = '-9999px';
+            annexureContainer.style.top = '-9999px';
+            annexureContainer.style.width = '210mm';
+            annexureContainer.style.height = 'auto';
+            annexureContainer.style.backgroundColor = '#ffffff';
+            annexureContainer.style.fontSize = '12pt';
+            annexureContainer.style.fontFamily = "'Arial', sans-serif";
+            document.body.appendChild(annexureContainer);
+
+            // Convert annexure to canvas
+            const annexureCanvas = await html2canvas(annexureContainer, {
+                scale: 1.5,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff',
+                allowTaint: true,
+                imageTimeout: 10000,
+                windowHeight: annexureContainer.scrollHeight,
+                windowWidth: 793
+            });
+
+            // Calculate dimensions for annexure
+            const annexureImgHeight = (annexureCanvas.height * imgWidth) / annexureCanvas.width;
+
+            // Add new page for annexure only if needed AND there's not enough space remaining
+            const remainingHeightOnPage = pageHeight - footerHeight - currentPageYPosition;
+
+            if (needsNewPage && annexureImgHeight > remainingHeightOnPage && currentPageYPosition > headerHeight + 50) {
+                // Only add new page if section won't fit AND there's substantial content already on page
+                pdf.addPage();
+                pageNumber++;
+                currentPageYPosition = headerHeight;
+                console.log(`📄 Added new page for ${annexureName} (insufficient space)`);
+            } else if (needsNewPage && currentPageYPosition <= headerHeight + 50) {
+                console.log(`📄 Skipping new page for ${annexureName} - minimal content on current page, continuing`);
+            }
+            let annexureHeightLeft = annexureImgHeight;
+            let annexureSourceY = 0;
+            let annexurePageStarted = !needsNewPage;
+
+            // Paginate annexure content
+            while (annexureHeightLeft > 0) {
+                // Check if content fits on current page
+                let remainingHeightOnPage = pageHeight - footerHeight - currentPageYPosition;
+
+                if (annexureHeightLeft > remainingHeightOnPage) {
+                    // Content doesn't fit, need new page
+                    pdf.addPage();
+                    pageNumber++;
+                    currentPageYPosition = headerHeight;
+                    remainingHeightOnPage = pageHeight - footerHeight - currentPageYPosition;
+                }
+
+                let imageHeightForAnnexurePage = Math.min(remainingHeightOnPage, annexureHeightLeft);
+                const annexureCanvasHeight = annexureCanvas.height;
+                const annexureCanvasWidth = annexureCanvas.width;
+                const annexureSourceYPixels = (annexureSourceY / annexureImgHeight) * annexureCanvasHeight;
+                const annexureMaxHeightPixels = (imageHeightForAnnexurePage / annexureImgHeight) * annexureCanvasHeight;
+
+                const annexureSafeHeightPixels = findSafeBreakPoint(annexureCanvasHeight, annexureSourceYPixels, annexureMaxHeightPixels);
+                const annexureSourceHeightPixels = Math.min(annexureSafeHeightPixels, annexureMaxHeightPixels);
+
+                imageHeightForAnnexurePage = (annexureSourceHeightPixels / annexureCanvasHeight) * annexureImgHeight;
+
+                // Create cropped canvas for annexure page
+                const annexurePageCanvas = document.createElement('canvas');
+                annexurePageCanvas.width = annexureCanvasWidth;
+                annexurePageCanvas.height = annexureSourceHeightPixels;
+                const annexurePageCtx = annexurePageCanvas.getContext('2d');
+                annexurePageCtx.drawImage(
+                    annexureCanvas,
+                    0, annexureSourceYPixels,
+                    annexureCanvasWidth, annexureSourceHeightPixels,
+                    0, 0,
+                    annexureCanvasWidth, annexureSourceHeightPixels
+                );
+
+                const annexurePageImgData = annexurePageCanvas.toDataURL('image/jpeg', 0.85);
+                pdf.addImage(annexurePageImgData, 'JPEG', 0, currentPageYPosition, imgWidth, imageHeightForAnnexurePage);
+
+                // Add page number
+                pdf.setFontSize(9);
+                pdf.text(`Page ${pageNumber}`, 105, pageHeight - 5, { align: 'center' });
+
+                annexureHeightLeft -= imageHeightForAnnexurePage;
+                annexureSourceY += imageHeightForAnnexurePage;
+                currentPageYPosition += imageHeightForAnnexurePage;
+            }
+
+            // Clean up container
+            document.body.removeChild(annexureContainer);
+            console.log(`✅ ${annexureName} section added to PDF`);
+        };
+
+        // Process Cost of Construction section (always starts on new page)
+        if (costOfConstructionHtmlContent) {
+            await processAnnexureSection(costOfConstructionHtmlContent, 'Cost of Construction', true);
+        }
+
+        // Process Annexure-II section (no new page if already on new page)
+        if (annexure2HtmlContent) {
+            await processAnnexureSection(annexure2HtmlContent, 'Annexure-II', false);
+        }
+
+        // Process Annexure-III section (no new page - continue from previous)
+        if (annexure3HtmlContent) {
+            await processAnnexureSection(annexure3HtmlContent, 'Annexure-III', false);
+        }
+
+        // Process Property Images section (always starts on new page)
+        if (propertyImagesHtmlContent) {
+            currentPageYPosition = headerHeight;
+            await processAnnexureSection(propertyImagesHtmlContent, 'Property Images', true);
+        }
+
+        // Process Area Images on new page
+        if (areaImagesHtmlContent) {
+            currentPageYPosition = headerHeight;
+            await processAnnexureSection(areaImagesHtmlContent, 'Area Images', true);
+        }
+
+        // Process Location Images on new page
+        if (locationImagesHtmlContent) {
+            await processAnnexureSection(locationImagesHtmlContent, 'Location Images', true);
+        }
+
+        // Process Supporting Documents - each on its own page
+        if (supportingDocsHtmlContent) {
+            // Extract individual supporting document pages
+            const docPageRegex = /<div[^>]*supporting-docs-page[^>]*>[\s\S]*?<\/div>/g;
+            const docPages = supportingDocsHtmlContent.match(docPageRegex) || [];
+
+            console.log(`📄 Found ${docPages.length} supporting document pages`);
+
+            // Process each document on a new page
+            for (let i = 0; i < docPages.length; i++) {
+                const docHtml = `<div style="width: 100%; height: auto;">${docPages[i]}</div>`;
+
+                // Create new page for each document
+                if (i === 0 && currentPageYPosition > headerHeight) {
+                    pdf.addPage();
+                    pageNumber++;
+                } else if (i > 0) {
+                    pdf.addPage();
+                    pageNumber++;
+                }
+
+                currentPageYPosition = headerHeight;
+
+                // Process single document
+                await processAnnexureSection(docHtml, `Supporting Document ${i + 1}`, false);
+            }
+        }
+
+        console.log('📸 All image sections processed and added to PDF');
+
+        // Add page canvases as separate pages in PDF
+        console.log(`📄 Adding ${pageCanvases.length} separate .page canvases to PDF...`);
+        for (let i = 0; i < pageCanvases.length; i++) {
+            const pageCanvas = pageCanvases[i];
+            const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.85);
+            const pageImgHeight = (pageCanvas.height * imgWidth) / pageCanvas.width;
+
+            pdf.addPage();
+            // Add image with proper margins (12mm = ~45px at 96dpi)
+            const leftMargin = 12;
+            const topMargin = 12;
+            const availableWidth = imgWidth - (leftMargin * 2);
+            const adjustedImgHeight = (pageCanvas.height * availableWidth) / pageCanvas.width;
+
+            pdf.addImage(pageImgData, 'JPEG', leftMargin, topMargin, availableWidth, adjustedImgHeight);
+            pdf.setFontSize(9);
+            pdf.text(`Page ${pageNumber}`, 105, pageHeight - 5, { align: 'center' });
+            pageNumber++;
+            console.log(`✅ Added .page canvas ${i + 1} as page ${pageNumber - 1}`);
+        }
+
+        // Add images as separate pages
+        console.log('📸 Adding', imageData.length, 'images to PDF...');
+
+        // Filter out images with invalid src before adding to PDF
+        const validImages = imageData.filter(img => {
+            if (!img.src || typeof img.src !== 'string' || !img.src.trim()) {
+                console.log(`⏭️ Skipping image with invalid src: ${img.label}`);
+                return false;
+            }
+            return true;
+        });
+
+        if (validImages.length > 0) {
+            // Separate images by type
+            const propertyImgs = validImages.filter(img => img.type === 'property');
+            const locationImgs = validImages.filter(img => img.type === 'location');
+            const supportingImgs = validImages.filter(img => img.type === 'supporting');
+
+            // ===== ADD PROPERTY IMAGES: 6 per page (2 columns x 3 rows) =====
+            if (propertyImgs.length > 0) {
+                pdf.addPage();
+                let imgIndex = 0;
+
+                while (imgIndex < propertyImgs.length) {
+                    const startIdx = imgIndex;
+                    let row = 0;
+
+                    // Add up to 6 images (2 columns x 3 rows) per page
+                    for (row = 0; row < 3 && imgIndex < propertyImgs.length; row++) {
+                        const yPos = 15 + row * 92; // 3 rows with spacing
+
+                        // Left column
+                        if (imgIndex < propertyImgs.length) {
+                            const img = propertyImgs[imgIndex];
+                            try {
+                                if (img.src.startsWith('data:') || img.src.startsWith('blob:') || img.src.startsWith('http://') || img.src.startsWith('https://')) {
+                                    pdf.setFontSize(8);
+                                    pdf.setFont(undefined, 'bold');
+                                    pdf.text(img.label, 12, yPos);
+                                    pdf.addImage(img.src, 'JPEG', 12, yPos + 4, 92, 82);
+                                    console.log(`✅ Added property image (L): ${img.label}`);
+                                }
+                            } catch (err) {
+                                console.warn(`Failed to add property image ${img.label}:`, err?.message);
+                            }
+                            imgIndex++;
+                        }
+
+                        // Right column
+                        if (imgIndex < propertyImgs.length) {
+                            const img = propertyImgs[imgIndex];
+                            try {
+                                if (img.src.startsWith('data:') || img.src.startsWith('blob:') || img.src.startsWith('http://') || img.src.startsWith('https://')) {
+                                    pdf.setFontSize(8);
+                                    pdf.setFont(undefined, 'bold');
+                                    pdf.text(img.label, 108, yPos);
+                                    pdf.addImage(img.src, 'JPEG', 108, yPos + 4, 92, 82);
+                                    console.log(`✅ Added property image (R): ${img.label}`);
+                                }
+                            } catch (err) {
+                                console.warn(`Failed to add property image ${img.label}:`, err?.message);
+                            }
+                            imgIndex++;
+                        }
+                    }
+
+                    // Add new page if more images remain
+                    if (imgIndex < propertyImgs.length) {
+                        pdf.addPage();
+                    }
+                }
+            }
+
+            // Location images are now rendered in HTML with page-break styling
+            // They appear in the PDF automatically via html2canvas rendering
+            if (locationImgs.length > 0) {
+                console.log(`✅ Location images (${locationImgs.length}) rendered via HTML`);
+            }
+
+            // Supporting documents are now rendered in HTML with page-break styling
+            // They appear in the PDF automatically via html2canvas rendering
+            if (supportingImgs.length > 0) {
+                console.log(`✅ Supporting documents (${supportingImgs.length}) rendered via HTML`);
+            }
+        } else {
+            console.log('⏭️ No valid images to add to PDF');
+        }
+
+        // Add PDF metadata including generation time
+        const now = new Date();
+        const generationTime = now.toLocaleString();
+        pdf.setProperties({
+            title: `Valuation Report - ${record?.clientName || record?.uniqueId || 'Report'}`,
+            subject: 'Property Valuation Report',
+            author: 'UBI APF Valuation System',
+            keywords: 'Valuation, Property, UBI APF',
+            creator: 'UBI APF PDF Generator'
+        });
+
+        // Download PDF
+        const filename = `valuation_${record?.clientName || record?.uniqueId || Date.now()}.pdf`;
+        pdf.save(filename);
+
+        console.log(`✅ PDF generated at: ${generationTime}`);
+
+        console.log('✅ PDF generated and downloaded:', filename);
+        return filename;
+    } catch (error) {
+        console.error('❌ Client-side PDF generation error:', error);
+        throw error;
+    }
+}
 
 // Alias for generateRecordPDF to match UBI APF naming
 export const generateUbiApfPDF = generateUbiApfRecordPDF;
 
-    const ubiApfPdfService = {
-        generateUbiApfValuationReportHTML,
-        generateUbiApfRecordPDF,
-        generateUbiApfPDF,
-        previewUbiApfValuationPDF,
-        generateUbiApfRecordPDFOffline,
-        normalizeDataForPDF
-    };
+const ubiApfPdfService = {
+    generateUbiApfValuationReportHTML,
+    generateUbiApfRecordPDF,
+    generateUbiApfPDF,
+    previewUbiApfValuationPDF,
+    generateUbiApfRecordPDFOffline,
+    normalizeDataForPDF
+};
 
-    export default ubiApfPdfService;
+export default ubiApfPdfService;

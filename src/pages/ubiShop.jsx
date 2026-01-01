@@ -575,15 +575,15 @@ const EditValuationPage = ({ user, onLogin }) => {
             dispatch(showLoader());
             // ALWAYS fetch fresh data from DB - do not use local state which may be stale
             let dataToDownload;
-
             try {
                 dataToDownload = await getValuationById(id, username, role, clientId);
-                ('✅ Fresh data fetched for PDF:', {
+                console.log(':white_tick: Fresh data fetched for PDF:', {
                     agreementForSale: dataToDownload?.agreementForSale || dataToDownload?.documentsProduced?.photocopyCopyAgreement,
-                    bankName: dataToDownload?.bankName
+                    bankName: dataToDownload?.bankName,
+                    documentPreviews: dataToDownload?.documentPreviews?.length || 0
                 });
             } catch (fetchError) {
-                console.error('❌ Failed to fetch fresh data:', fetchError);
+                console.error(':x: Failed to fetch fresh data:', fetchError);
                 // Only fallback to valuation/formData if fetch fails
                 dataToDownload = valuation;
                 if (!dataToDownload) {
@@ -591,7 +591,14 @@ const EditValuationPage = ({ user, onLogin }) => {
                     dataToDownload = formData;
                 }
             }
-
+            // Ensure documentPreviews is included from local state (has latest unsaved docs)
+            if (formData.documentPreviews && formData.documentPreviews.length > 0) {
+                console.log(':page_facing_up: Merging local documentPreviews:', formData.documentPreviews.length);
+                dataToDownload = {
+                    ...dataToDownload,
+                    documentPreviews: formData.documentPreviews
+                };
+            }
             await generateRecordPDFOffline(dataToDownload);
             showSuccess('PDF downloaded successfully');
         } catch (error) {
