@@ -1467,7 +1467,7 @@ export function generateValuationReportHTML(data = {}) {
 
   <div style="padding: 0 8mm;">
     <div class="cover-header">
-    <p style="margin: 5px 0; font-size: 12pt;">Ref. No.: ${safeGet(pdfData, 'uniqueId', 'NA')}</p>
+    <p style="margin: 5px 0; font-size: 12pt;">Ref. No.: ${safeGet(pdfData, 'referenceNo', 'NA')}</p>
     <p style="text-align: right; margin: 5px 0; font-size: 12pt;"><strong>Date: ${formatDate(safeGet(pdfData, 'valuationMadeDate'))}</strong></p>
     <p style="margin: 5px 0; font-size: 12pt;">TO,</p>
     <p style="margin: 5px 0; font-size: 12pt;">${safeGet(data, 'bankName')}</p>
