@@ -49,6 +49,7 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
     const { currentPage, itemsPerPage, totalItems } = useSelector((state) => state.pagination);
     const { isLoading } = useSelector((state) => state.loader);
     const [files, setFiles] = useState([]);
+    const [initialLoadComplete, setInitialLoadComplete] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [logoutModalOpen, setLogoutModalOpen] = useState(false);
     const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -264,6 +265,7 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
     useEffect(() => {
         if (!isLoggedIn) {
             setFiles([]);
+            setInitialLoadComplete(false);
             setTimeDurations({});
             setStatusFilter(null);
             setCityFilter(null);
@@ -449,11 +451,15 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
             dispatch(setTotalItems(filesList.length));
             if (isInitial) {
                 dispatch(setCurrentPage(1));
+                setInitialLoadComplete(true);
             }
             calculateTimeDurations(filesList);
         } catch (err) {
             console.error("❌ Dashboard - Error fetching valuations:", err);
             // Error fetching valuations
+            if (isInitial) {
+                setInitialLoadComplete(true);
+            }
         } finally {
             if (showLoadingIndicator) {
                 dispatch(hideLoader());
@@ -1096,7 +1102,7 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
                             </CardHeader>
 
                             <CardContent className="p-3">
-                                 {isLoading ? (
+                                 {isLoading || !initialLoadComplete ? (
                                      <div className="text-center py-24">
                                          <div className="mb-6 flex justify-center">
                                              <div className="p-6 bg-gradient-to-br from-slate-200 via-slate-100 to-slate-150 rounded-3xl shadow-lg">
