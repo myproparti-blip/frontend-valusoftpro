@@ -1096,17 +1096,26 @@ const DashboardPage = ({ user, onLogout, onLogin }) => {
                             </CardHeader>
 
                             <CardContent className="p-3">
-                                {files.length === 0 ? (
-                                    <div className="text-center py-24">
-                                        <div className="mb-6 flex justify-center">
-                                            <div className="p-6 bg-gradient-to-br from-slate-200 via-slate-100 to-slate-150 rounded-3xl shadow-lg">
-                                                <FaEye className="h-20 w-20 text-slate-600" />
-                                            </div>
-                                        </div>
-                                        <p className="text-slate-900 font-bold text-2xl tracking-tight">No data found</p>
-                                        <p className="text-slate-600 text-sm mt-3 font-medium">Try adjusting your filters or create a new record</p>
-                                    </div>
-                                ) : paginatedFiles.length > 0 ? (
+                                 {isLoading ? (
+                                     <div className="text-center py-24">
+                                         <div className="mb-6 flex justify-center">
+                                             <div className="p-6 bg-gradient-to-br from-slate-200 via-slate-100 to-slate-150 rounded-3xl shadow-lg">
+                                                 <FaSpinner className="h-20 w-20 text-slate-600 animate-spin" />
+                                             </div>
+                                         </div>
+                                         <p className="text-slate-900 font-bold text-2xl tracking-tight">Loading data...</p>
+                                     </div>
+                                 ) : files.length === 0 ? (
+                                     <div className="text-center py-24">
+                                         <div className="mb-6 flex justify-center">
+                                             <div className="p-6 bg-gradient-to-br from-slate-200 via-slate-100 to-slate-150 rounded-3xl shadow-lg">
+                                                 <FaEye className="h-20 w-20 text-slate-600" />
+                                             </div>
+                                         </div>
+                                         <p className="text-slate-900 font-bold text-2xl tracking-tight">No data found</p>
+                                         <p className="text-slate-600 text-sm mt-3 font-medium">Try adjusting your filters or create a new record</p>
+                                     </div>
+                                 ) : paginatedFiles.length > 0 ? (
                                     <>
                                         <div className="overflow-x-auto">
                                             <Table>
