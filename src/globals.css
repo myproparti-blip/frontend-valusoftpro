@@ -1,0 +1,267 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 30 100% 97%;
+        --foreground: 0 0% 11%;
+        --card: 0 0% 100%;
+        --card-foreground: 0 0% 11%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 0 0% 11%;
+        --muted: 30 50% 90%;
+        --muted-foreground: 0 0% 29%;
+        --accent: 16 85% 49%;
+        --accent-foreground: 0 0% 100%;
+        --destructive: 0 84.2% 60.2%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 30 50% 91%;
+        --input: 30 50% 91%;
+        --ring: 16 85% 49%;
+        --primary: 16 85% 49%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 30 50% 31%;
+        --secondary-foreground: 0 0% 100%;
+        --radius: 0.75rem;
+    }
+
+    .dark {
+        --background: 30 50% 10%;
+        --foreground: 0 0% 98%;
+        --card: 30 50% 10%;
+        --card-foreground: 0 0% 98%;
+        --popover: 30 50% 10%;
+        --popover-foreground: 0 0% 98%;
+        --muted: 30 30% 20%;
+        --muted-foreground: 0 0% 65%;
+        --accent: 16 85% 49%;
+        --accent-foreground: 0 0% 100%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 30 30% 20%;
+        --input: 30 30% 20%;
+        --ring: 16 85% 49%;
+        --primary: 16 85% 49%;
+        --primary-foreground: 0 0% 100%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+        font-feature-settings: "rounding-mode" 0;
+    }
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-muted;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    @apply bg-foreground/50;
+}
+
+/* Form styling */
+@layer components {
+    .form-control {
+        @apply flex flex-col space-y-2;
+    }
+
+    .form-label {
+        @apply text-sm font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#1B1B1B] uppercase tracking-wider;
+    }
+
+    .form-input {
+        @apply flex h-11 w-full rounded-lg border-2 border-[#E6D6C8] bg-white px-4 py-2 text-base ring-offset-background placeholder:text-[#4A4A4A] focus-visible:outline-none focus-visible:border-[#E46F25] focus-visible:ring-2 focus-visible:ring-[#E46F25]/20 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-[#FFF6EF] md:text-sm font-medium transition-all duration-200 shadow-sm text-[#1B1B1B];
+    }
+
+    .form-textarea {
+        @apply flex min-h-[120px] w-full rounded-lg border-2 border-[#E6D6C8] bg-white px-4 py-2 text-base ring-offset-background placeholder:text-[#4A4A4A] focus-visible:outline-none focus-visible:border-[#E46F25] focus-visible:ring-2 focus-visible:ring-[#E46F25]/20 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-[#FFF6EF] md:text-sm font-medium transition-all duration-200 shadow-sm resize-none text-[#1B1B1B];
+    }
+}
+
+/* Animations */
+@layer utilities {
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        to {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    .animate-slide-down {
+        animation: slideDown 0.3s ease-out;
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.3s ease-out;
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+
+    .animate-shimmer {
+        animation: shimmer 2s infinite;
+        background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.2) 20%,
+            rgba(255, 255, 255, 0) 40%
+        );
+        background-size: 1000px 100%;
+    }
+
+    @keyframes pulse-glow {
+        0%, 100% {
+            opacity: 1;
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+        }
+        50% {
+            opacity: 0.8;
+            box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+        }
+    }
+
+    .animate-pulse-glow {
+        animation: pulse-glow 2s infinite;
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-5px);
+        }
+    }
+
+    .animate-float {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes gradient-shift {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    .animate-gradient-shift {
+        background-size: 200% 200%;
+        animation: gradient-shift 3s ease infinite;
+    }
+
+    /* Premium shadow effects */
+    .shadow-premium-sm {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .shadow-premium-md {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .shadow-premium-lg {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .shadow-premium-xl {
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Glass morphism effect */
+    .glass-effect {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Responsive table improvements */
+    @media (max-width: 768px) {
+        .overflow-x-auto {
+            font-size: 0.875rem;
+        }
+
+        table {
+            min-width: 100%;
+        }
+    }
+
+    /* Mobile-first responsive design */
+    @media (max-width: 640px) {
+        .grid {
+            gap: 0.5rem !important;
+        }
+
+        .p-6 {
+            padding: 1rem !important;
+        }
+
+        .text-3xl {
+            font-size: 1.875rem !important;
+        }
+
+        .text-xl {
+            font-size: 1.125rem !important;
+        }
+    }
+}

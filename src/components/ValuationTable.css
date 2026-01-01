@@ -1,0 +1,410 @@
+/**
+ * Valuation Table Styles
+ * Professional styling for the valuation table with download functionality
+ */
+
+/* ==================== CONTAINER ==================== */
+.valuation-table-container {
+  width: 100%;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.valuation-table-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  font-size: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+/* ==================== ALERTS ==================== */
+.alert {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  animation: slideDown 0.3s ease-in-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.alert-error {
+  background-color: #fee;
+  color: #c33;
+  border-left: 4px solid #c33;
+}
+
+.alert-success {
+  background-color: #efe;
+  color: #3c3;
+  border-left: 4px solid #3c3;
+}
+
+/* ==================== TABLE WRAPPER ==================== */
+.table-wrapper {
+  overflow-x: auto;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ==================== TABLE ==================== */
+.valuation-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+/* ==================== TABLE HEADER ==================== */
+.valuation-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+}
+
+.valuation-table th {
+  padding: 16px 12px;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 2px solid #667eea;
+}
+
+.valuation-table th:last-child {
+  text-align: center;
+}
+
+/* ==================== TABLE BODY ==================== */
+.valuation-table tbody tr {
+  border-bottom: 1px solid #e0e0e0;
+  transition: background-color 0.2s ease;
+}
+
+.valuation-table tbody tr:hover {
+  background-color: #f5f7ff;
+}
+
+.valuation-table td {
+  padding: 14px 12px;
+  vertical-align: middle;
+}
+
+/* Row status classes */
+.row-pending {
+  border-left: 4px solid #ffc107;
+}
+
+.row-approved {
+  border-left: 4px solid #28a745;
+}
+
+.row-rejected {
+  border-left: 4px solid #dc3545;
+}
+
+.row-rework {
+  border-left: 4px solid #ff9800;
+}
+
+.row-on-progress {
+  border-left: 4px solid #2196f3;
+}
+
+/* ==================== CELL STYLES ==================== */
+.cell-client {
+  font-weight: 500;
+  color: #333;
+  min-width: 150px;
+}
+
+.cell-address {
+  color: #666;
+  font-size: 13px;
+  min-width: 200px;
+}
+
+.cell-address span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cell-city {
+  color: #666;
+  min-width: 100px;
+}
+
+.cell-fmv {
+  color: #333;
+  font-size: 14px;
+  min-width: 150px;
+}
+
+.fmv-amount {
+  color: #28a745;
+  font-size: 15px;
+}
+
+.cell-status {
+  text-align: center;
+  min-width: 120px;
+}
+
+.cell-date {
+  color: #999;
+  font-size: 13px;
+  min-width: 100px;
+}
+
+.cell-actions {
+  text-align: center;
+  min-width: 300px;
+}
+
+/* ==================== STATUS BADGES ==================== */
+.badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-pending {
+  background-color: #ffeaa7;
+  color: #d63031;
+}
+
+.badge-approved {
+  background-color: #a9dfbf;
+  color: #27ae60;
+}
+
+.badge-rejected {
+  background-color: #f5b7b1;
+  color: #c0392b;
+}
+
+.badge-rework {
+  background-color: #ffd6a5;
+  color: #e67e22;
+}
+
+.badge-on-progress {
+  background-color: #a9ccf7;
+  color: #2980b9;
+}
+
+/* ==================== ACTION BUTTONS ==================== */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+/* Download Button */
+.btn-download {
+  background-color: #667eea;
+  color: white;
+  border: none;
+}
+
+.btn-download:hover:not(:disabled) {
+  background-color: #5568d3;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-download:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-download:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-download.loading {
+  opacity: 0.8;
+}
+
+/* Preview Button */
+.btn-preview {
+  background-color: #f39c12;
+  color: white;
+  border: none;
+}
+
+.btn-preview:hover {
+  background-color: #e67e22;
+  box-shadow: 0 2px 8px rgba(243, 156, 18, 0.4);
+  transform: translateY(-2px);
+}
+
+/* View Button */
+.btn-view {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-view:hover {
+  background-color: #2980b9;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.4);
+  transform: translateY(-2px);
+}
+
+/* ==================== LOADING SPINNER ==================== */
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 0.8s linear infinite;
+  margin-right: 4px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==================== TABLE FOOTER ==================== */
+.table-footer {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #666;
+}
+
+.table-footer p {
+  margin: 0;
+}
+
+.download-info {
+  color: #667eea;
+  font-weight: 500;
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+@media (max-width: 1200px) {
+  .valuation-table td,
+  .valuation-table th {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 768px) {
+  .valuation-table-container {
+    padding: 12px;
+  }
+
+  .valuation-table {
+    font-size: 12px;
+  }
+
+  .valuation-table th,
+  .valuation-table td {
+    padding: 10px 6px;
+  }
+
+  /* Hide less important columns on mobile */
+  .cell-address {
+    display: none;
+  }
+
+  .cell-date {
+    display: none;
+  }
+
+  .cell-city {
+    display: none;
+  }
+
+  .cell-fmv {
+    min-width: 120px;
+  }
+
+  .table-footer {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .btn {
+    padding: 6px 10px;
+    font-size: 10px;
+  }
+
+  .action-buttons {
+    gap: 4px;
+  }
+}
+
+/* ==================== PRINT STYLES ==================== */
+@media print {
+  .action-buttons,
+  .alert,
+  .table-footer {
+    display: none;
+  }
+
+  .valuation-table-container {
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .valuation-table {
+    page-break-inside: avoid;
+  }
+}
