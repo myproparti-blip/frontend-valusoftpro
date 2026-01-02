@@ -2803,18 +2803,10 @@ export function generateUbiApfValuationReportHTML(data = {}) {
         </div>
 
     </div>
-</div>
- 
+    </div>
+    
         <!-- Page Break Before COST OF CONSTRUCTION -->
-                     <div
-                       class="cost-of-construction-section" style="
-                      font-size:11pt;
-                       line-height:1.5;
-                       margin:0;
-                       padding:0 40px;
-                       box-sizing:border-box;
-                       text-align:justify;
-                       ">
+                     <div>
                      <div style="text-align: center; margin-bottom: 15px; margin-top: 0px; font-weight: bold; font-size: 11pt; letter-spacing: 0.5px;">
                         COST OF CONSTRUCTION OF AS PER ACTUAL MEASUREMENT
                      </div>
@@ -2981,9 +2973,8 @@ export function generateUbiApfValuationReportHTML(data = {}) {
                   ` : ''}
                     </div>
                     </div> <!-- END: cost-of-construction-section -->
-                    </div>
                     
-            <!-- PAGE 8: ANNEXURE-II DECLARATION FROM VALUERS -->
+                  <!-- PAGE 8: ANNEXURE-II DECLARATION FROM VALUERS -->
 <div class="annexure-ii-section" style="margin-left: 12mm; margin-right: 12mm; margin-top: 0; margin-bottom: 12mm; border: none; outline: none; box-shadow: none; background: white; page-break-before: avoid;">
     <div style="text-align: center; margin-bottom: 5px; font-weight: bold; font-size: 11pt;">
         Annexure-II
@@ -3315,7 +3306,7 @@ valuer organization discredits the profession.  </p>
 
                 return pages.map((pageImages, pageIdx) => `
         <div class="page images-section area-images-page" style="page-break-before: always; page-break-after: always; break-before: page; break-after: page; page-break-inside: avoid;">
-             <div style="padding: 8px; font-size: 12pt;">
+             <div style="padding: 10px; font-size: 12pt;">
                  ${pageIdx === 0 ? '<h2 style="text-align: center; margin: 0 0 8px 0; font-weight: bold;">PROPERTY AREA IMAGES</h2>' : ''}
                  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px; page-break-inside: avoid; break-inside: avoid; margin: 0; padding: 0;">
                      ${pageImages.map(item => `
@@ -3698,7 +3689,6 @@ export async function generateUbiApfRecordPDFOffline(record) {
 
         // Find all sections and extract them
         const sections = [
-            { name: 'costOfConstruction', index: costOfConstructionIndex },
             { name: 'annexure2', index: annexure2Index },
             { name: 'annexure3', index: annexure3Index },
             { name: 'propertyImages', index: propertyImagesIndex },
@@ -3713,7 +3703,7 @@ export async function generateUbiApfRecordPDFOffline(record) {
                 const sectionStart = htmlContent.lastIndexOf('<div', section.index);
 
                 if (i === 0) {
-                    // Everything before first section is main content
+                    // Everything before first section is main content (including cost-of-construction-section)
                     mainHtmlContent = htmlContent.substring(0, sectionStart);
                 }
 
@@ -3723,9 +3713,7 @@ export async function generateUbiApfRecordPDFOffline(record) {
                     : htmlContent.length;
                 const sectionContent = htmlContent.substring(sectionStart, sectionEnd);
 
-                if (section.name === 'costOfConstruction') {
-                    costOfConstructionHtmlContent = sectionContent;
-                } else if (section.name === 'annexure2') {
+                 if (section.name === 'annexure2') {
                     annexure2HtmlContent = sectionContent;
                 } else if (section.name === 'annexure3') {
                     annexure3HtmlContent = sectionContent;
@@ -3739,14 +3727,14 @@ export async function generateUbiApfRecordPDFOffline(record) {
                     supportingDocsHtmlContent = sectionContent;
                 }
             }
-            console.log('✂️ Split HTML: Sections separated - Main Content, Cost of Construction, Annexure-II, Annexure-III, Property Images, Area Images, Location Images, Supporting Docs');
+            console.log('✂️ Split HTML: Sections separated - Main Content (with Cost of Construction), Annexure-II, Annexure-III, Property Images, Area Images, Location Images, Supporting Docs');
+        } else {
+            // No other sections found, everything is main content
+            mainHtmlContent = htmlContent;
         }
 
         // Remove separated sections from main content to prevent duplication
         let cleanMainContent = mainHtmlContent;
-
-        // Remove cost-of-construction-section
-        cleanMainContent = cleanMainContent.replace(/<div[^>]*cost-of-construction-section[^>]*>[\s\S]*?<\/div>\s*<!-- END: cost-of-construction-section -->/g, '');
 
         // Remove annexure-ii-section
         cleanMainContent = cleanMainContent.replace(/<div[^>]*annexure-ii-section[^>]*>[\s\S]*?<\/div>\s*<!-- END: annexure-ii-section -->/g, '');
@@ -4303,9 +4291,12 @@ export async function generateUbiApfRecordPDFOffline(record) {
 
         // Helper function to process annexure sections
         const processAnnexureSection = async (annexureHtmlContent, annexureName, needsNewPage = true) => {
-            if (!annexureHtmlContent) return;
+            if (!annexureHtmlContent) {
+                console.warn(`⚠️ ${annexureName} section is empty or undefined`);
+                return;
+            }
 
-            console.log(`📄 Processing ${annexureName} section...`);
+            console.log(`📄 Processing ${annexureName} section... Content length: ${annexureHtmlContent.length}`);
 
             // Create container for annexure
             const annexureContainer = document.createElement('div');
@@ -4405,10 +4396,7 @@ export async function generateUbiApfRecordPDFOffline(record) {
             console.log(`✅ ${annexureName} section added to PDF`);
         };
 
-        // Process Cost of Construction section (always starts on new page)
-        if (costOfConstructionHtmlContent) {
-            await processAnnexureSection(costOfConstructionHtmlContent, 'Cost of Construction', true);
-        }
+        
 
         // Process Annexure-II section (no new page if already on new page)
         if (annexure2HtmlContent) {

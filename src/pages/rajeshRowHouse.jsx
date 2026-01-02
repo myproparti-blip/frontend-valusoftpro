@@ -45,6 +45,7 @@ const RajeshRowHouseEditForm = ({ user, onLogin }) => {
     const [city, setCity] = useState("");
     const [dsa, setDsa] = useState("");
     const [engineerName, setEngineerName] = useState("");
+    const [bankImagePreview, setBankImagePreview] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [modalAction, setModalAction] = useState(null);
     const [modalFeedback, setModalFeedback] = useState("");
@@ -110,6 +111,7 @@ const RajeshRowHouseEditForm = ({ user, onLogin }) => {
         propertyImages: [],
         locationImages: [],
         documentPreviews: [],
+        bankImage: null,
         areaImages: {},
         photos: {
             elevationImages: [],
@@ -760,6 +762,7 @@ const RajeshRowHouseEditForm = ({ user, onLogin }) => {
     const fileInputRef3 = useRef(null);
     const fileInputRef4 = useRef(null);
     const locationFileInputRef = useRef(null);
+    const bankFileInputRef = useRef(null);
     const documentFileInputRef = useRef(null);
     const dropdownFetchedRef = useRef(false);
 
@@ -918,6 +921,20 @@ const RajeshRowHouseEditForm = ({ user, onLogin }) => {
                         return { url: previewUrl, name: img.name || `Location Image ${idx + 1}`, path: img.path || img.fileName || '' };
                     });
                 setLocationImagePreviews(locationPreviews);
+            }
+
+            // Restore bank image preview from database
+            if (dbData.bankImage) {
+                let previewUrl = '';
+                if (typeof dbData.bankImage === 'string' && dbData.bankImage.startsWith('data:')) {
+                    previewUrl = dbData.bankImage;
+                } else if (typeof dbData.bankImage === 'string') {
+                    const fileName = dbData.bankImage.split('\\').pop() || dbData.bankImage.split('/').pop();
+                    previewUrl = `/api/uploads/${fileName}`;
+                }
+                if (previewUrl) {
+                    setBankImagePreview({ preview: previewUrl, name: 'Bank Image' });
+                }
             }
 
             // Restore document previews from database
@@ -1236,6 +1253,36 @@ const RajeshRowHouseEditForm = ({ user, onLogin }) => {
         }));
     };
 
+    const handleBankImageUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            const base64 = await fileToBase64(file);
+            setBankImagePreview({ preview: base64, name: file.name, file: file });
+            setFormData(prev => ({
+                ...prev,
+                bankImage: base64
+            }));
+        } catch (error) {
+            console.error('Error converting file to base64:', error);
+            showError('Failed to upload bank image');
+        }
+
+        // Reset input
+        if (bankFileInputRef.current) {
+            bankFileInputRef.current.value = '';
+        }
+    };
+
+    const removeBankImage = () => {
+        setBankImagePreview(null);
+        setFormData(prev => ({
+            ...prev,
+            bankImage: null
+        }));
+    };
+
     const handleCoordinateChange = (field, value) => {
         setFormData(prev => ({
             ...prev,
@@ -1422,6 +1469,7 @@ const RajeshRowHouseEditForm = ({ user, onLogin }) => {
                 coordinates: formData.coordinates,
                 propertyImages: formData.propertyImages || [],
                 locationImages: formData.locationImages || [],
+                bankImage: formData.bankImage || null,
                 documentPreviews: (formData.documentPreviews || []).map(doc => ({
                     fileName: doc.fileName,
                     size: doc.size,
@@ -4009,11 +4057,15 @@ const RajeshRowHouseEditForm = ({ user, onLogin }) => {
                                                 handleCoordinateChange={handleCoordinateChange}
                                                 setFormData={setFormData}
                                                 locationFileInputRef={locationFileInputRef}
+                                                bankFileInputRef={bankFileInputRef}
                                                 fileInputRef1={fileInputRef1}
                                                 fileInputRef2={fileInputRef2}
                                                 fileInputRef3={fileInputRef3}
                                                 fileInputRef4={fileInputRef4}
                                                 documentFileInputRef={documentFileInputRef}
+                                                bankImagePreview={bankImagePreview}
+                                                handleBankImageUpload={handleBankImageUpload}
+                                                removeBankImage={removeBankImage}
                                                 formType="rajeshrowhouse"
                                             />
                                         </div>

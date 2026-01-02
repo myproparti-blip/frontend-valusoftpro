@@ -215,7 +215,7 @@ const DocumentsPanel = ({
     return (
         <div className="space-y-8">
             {/* Bank Image Section */}
-            {!['ubiShop', 'ubiApf', 'bomFlat'].includes(formType) && (
+            {['rajeshhouse', 'rajeshbank', 'rajeshrowhouse'].includes(formType) && (
                 <div>
                     <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <FaImage className="h-5 w-5 text-orange-600" />
