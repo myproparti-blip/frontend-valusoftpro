@@ -181,7 +181,7 @@ const RajeshRowHouseEditForm = ({ user, onLogin }) => {
             part_B_treeCountPropertyDetails: '',
             part_B_yearConstructionBuilding: '',
             part_B_plotShapeAndCondition: '',
-            part_B_conditionOfPlot: '',
+            part_B_conditionOfPlot: '', 
             part_B_conditionOfBuildingStructure: '',
             part_B_generalConditionInteriorExterior: '',
             part_B_existencePowerAvailable: '',

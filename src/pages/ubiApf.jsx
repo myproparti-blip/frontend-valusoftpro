@@ -1102,6 +1102,27 @@ const handleDownloadPDF = useCallback(async () => {
         }));
     }, [bankName, city, dsa, engineerName]);
 
+    // Sync customFields state with formData.customFields
+    useEffect(() => {
+        if (formData.customFields && Array.isArray(formData.customFields) && formData.customFields.length > 0) {
+            // Only update if different to avoid infinite loops
+            if (JSON.stringify(customFields) !== JSON.stringify(formData.customFields)) {
+                ('🔄 Syncing customFields from formData:', formData.customFields.length);
+                setCustomFields(formData.customFields);
+            }
+        }
+    }, [formData.customFields]);
+
+    // Sync customFields state back to formData whenever customFields state changes
+    useEffect(() => {
+        if (customFields && Array.isArray(customFields)) {
+            setFormData(prev => ({
+                ...prev,
+                customFields: customFields
+            }));
+        }
+    }, [customFields]);
+
     // Monitor custom fields state changes for debugging
     useEffect(() => {
         if (formData.customExtentOfSiteFields?.length > 0) {
