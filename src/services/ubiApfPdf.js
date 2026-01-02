@@ -1781,7 +1781,7 @@ export function generateUbiApfValuationReportHTML(data = {}) {
                 <tr>
                     <td class="row-num"></td>
                     <td class="label">e) Mandal / District</td>
-                    <td class="value">${safeGet(pdfData, 'mandalDistrict', 'NA')}</td>
+                    <td class="value">${safeGet(pdfData, 'district', 'NA')}</td>
                 </tr>
                 <tr>
                     <td class="row-num"></td>
